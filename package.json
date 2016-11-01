@@ -1,0 +1,23 @@
+{
+  "name": "sfpc_projects",
+  "version": "1.0.0",
+  "description": "The place where all of our projects will live",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dqgorelick/SFPC_projects.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dqgorelick/SFPC_projects/issues"
+  },
+  "homepage": "https://github.com/dqgorelick/SFPC_projects#readme",
+  "dependencies": {
+    "express": "^4.14.0"
+  }
+}
