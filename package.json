@@ -18,6 +18,9 @@
   },
   "homepage": "https://github.com/dqgorelick/SFPC_projects#readme",
   "dependencies": {
-    "express": "^4.14.0"
+    "express": "^4.14.0",
+    "lodash": "^4.16.6",
+    "node-uuid": "^1.4.7",
+    "ws": "^1.1.1"
   }
 }
