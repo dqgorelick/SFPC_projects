@@ -1,66 +1,66 @@
-// modified from https://github.com/colinbdclark/osc.js-examples/tree/master/nodejs
+var osc = require('osc')
+var express = require('express')
+var app = express()
+var WebSocket = require('ws')
 
-var osc = require("osc"),
-    express = require("express"),
-    WebSocket = require("ws");
+var PORT = 8081
+
+// Create an Express-based Web Socket server to which OSC messages will be relayed.
+var appResources = __dirname + '/public'
+var server = app.listen(PORT)
+
+var wss = new WebSocket.Server({
+    server: server
+});
+
+wss.on('connection', function (socket) {
+    console.log('A Web Socket connection has been established!');
+});
+
+wss.broadcast = (data) => {
+  wss.clients.forEach(function each(client) {
+    client.send(data);
+  });
+};
 
 var getIPAddresses = function () {
-    var os = require("os"),
-        interfaces = os.networkInterfaces(),
-        ipAddresses = [];
-
+    var os = require('os')
+    var interfaces = os.networkInterfaces()
+    var ipAddresses = [];
     for (var deviceName in interfaces) {
         var addresses = interfaces[deviceName];
         for (var i = 0; i < addresses.length; i++) {
             var addressInfo = addresses[i];
-            if (addressInfo.family === "IPv4" && !addressInfo.internal) {
+            if (addressInfo.family === 'IPv4' && !addressInfo.internal) {
                 ipAddresses.push(addressInfo.address);
             }
         }
     }
-
     return ipAddresses;
 };
 
 // Bind to a UDP socket to listen for incoming OSC events.
 var udpPort = new osc.UDPPort({
-    localAddress: "0.0.0.0",
+    localAddress: '0.0.0.0',
     localPort: 57121
 });
 
-
-udpPort.on("ready", function () {
+udpPort.on('ready', function () {
     var ipAddresses = getIPAddresses();
-    console.log("Listening for OSC over UDP.");
+    console.log('Listening for OSC over UDP.');
     ipAddresses.forEach(function (address) {
-        console.log(" Host:", address + ", Port:", udpPort.options.localPort);
+        console.log(' Host:', address + ', Port:', udpPort.options.localPort);
     });
-    console.log("To start the demo, go to http://localhost:8081 in your web browser.");
+    console.log(`To start the demo, go to http://localhost:${PORT} in your web browser.`);
 });
 
 udpPort.open();
 
-// Create an Express-based Web Socket server to which OSC messages will be relayed.
-var appResources = __dirname + "/public",
-    app = express(),
-    server = app.listen(8081),
-    wss = new WebSocket.Server({
-        server: server
-    });
-
-app.use("/", express.static(appResources));
-
-wss.on("connection", function (socket) {
-    console.log("A Web Socket connection has been established!");
-    var socketPort = new osc.WebSocketPort({
-        socket: socket
-    });
-
-
-    udpPort.on("message", function (oscMsg) {
-        console.log("An OSC Message was received!", oscMsg);
-        if (oscMsg.address === '/notes') {
-            socket.send(JSON.stringify({ data: oscMsg }));
-        }
-    });
+udpPort.on('message', function (oscMsg) {
+    console.log('An OSC Message was received!', oscMsg);
+    if (oscMsg.address === '/notes') {
+        wss.broadcast(JSON.stringify({data: oscMsg}));
+    }
 });
+
+app.use('/', express.static(appResources));
