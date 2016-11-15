@@ -21,29 +21,6 @@ SynthDef(\bpfsaw, {
 }).add;
 )
 
-(
-SynthDef(\sfpc, {
-	arg amp=0.8, freq = 440.0;
-	var sig, env;
-	sig = Saw.ar(freq);
-	sig = BLowShelf.ar(sig, 200, 0.5, 0);
-	// sig = Balance2.ar(sig[0],sig[1], pan);
-	sig = sig * amp;
-	Out.ar(0, sig);
-}).add;
-)
-
-(
-~test = Pbind(
-	\instrument, \sfpc,
-).play;
-)
-
-s.plotTree;
-p = /*Pbind*/(\degree, Pwhite(0, 7, inf), \dur, 0.25, \legato, 1).play;
-p.stop;
-
-
 ~b = NetAddr.new("127.0.0.1", 57121);
 (
 ~chords = Pbind(

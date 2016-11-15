@@ -113,7 +113,7 @@ Pbind(
 ).play;
 )*/
 
-
+s.outDevices
 
 
 
@@ -122,11 +122,11 @@ Pbind(
 ~chords = Pbind(
 	\instrument, \bpfsaw,
 	\dur, Pwhite(4.5,7.0,inf),
-	\midinote, Pxrand([
+	\midinote, Pseq([
 		[54,61,56],
 		[23,35,54,59,61,64],
-		[28,40,47,56,59,63],
 		[42,52,57,61,63],
+		[28,40,47,56,59,63],
 	],inf),
 	\detune, Pexprand(0.05,0.2,inf),
 	\cfmin, 100,

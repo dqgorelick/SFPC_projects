@@ -28,6 +28,7 @@ var udpPort = new osc.UDPPort({
     localPort: 57121
 });
 
+
 udpPort.on("ready", function () {
     var ipAddresses = getIPAddresses();
     console.log("Listening for OSC over UDP.");
@@ -40,7 +41,7 @@ udpPort.on("ready", function () {
 udpPort.open();
 
 // Create an Express-based Web Socket server to which OSC messages will be relayed.
-var appResources = __dirname + "/web",
+var appResources = __dirname + "/public",
     app = express(),
     server = app.listen(8081),
     wss = new WebSocket.Server({
@@ -48,13 +49,18 @@ var appResources = __dirname + "/web",
     });
 
 app.use("/", express.static(appResources));
+
 wss.on("connection", function (socket) {
     console.log("A Web Socket connection has been established!");
     var socketPort = new osc.WebSocketPort({
         socket: socket
     });
 
-    var relay = new osc.Relay(udpPort, socketPort, {
-        raw: true
+
+    udpPort.on("message", function (oscMsg) {
+        console.log("An OSC Message was received!", oscMsg);
+        if (oscMsg.address === '/notes') {
+            socket.send(JSON.stringify({ data: oscMsg }));
+        }
     });
 });
