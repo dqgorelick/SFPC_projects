@@ -67,13 +67,9 @@
 
 	var _reactWebsocket2 = _interopRequireDefault(_reactWebsocket);
 
-	var _reactThreeRenderer = __webpack_require__(174);
+	var _Visualizer = __webpack_require__(301);
 
-	var _reactThreeRenderer2 = _interopRequireDefault(_reactThreeRenderer);
-
-	var _three = __webpack_require__(177);
-
-	var _three2 = _interopRequireDefault(_three);
+	var _Visualizer2 = _interopRequireDefault(_Visualizer);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -95,22 +91,6 @@
 	      notes: null,
 	      oscPort: null
 	    };
-	    _this.cameraPosition = new _three2.default.Vector3(0, 0, 5);
-
-	    _this.state = {
-	      cubeRotation: new _three2.default.Euler()
-	    };
-
-	    _this._onAnimate = function () {
-	      // we will get this callback every frame
-
-	      // pretend cubeRotation is immutable.
-	      // this helps with updates and pure rendering.
-	      // React will be sure that the rotation has now updated.
-	      _this.setState({
-	        cubeRotation: new _three2.default.Euler(_this.state.cubeRotation.x + 0.1, _this.state.cubeRotation.y + 0.1, 0)
-	      });
-	    };
 	    return _this;
 	  }
 
@@ -131,8 +111,6 @@
 	  }, {
 	    key: 'render',
 	    value: function render() {
-	      var width = window.innerWidth; // canvas width
-	      var height = window.innerHeight; // canvas height
 
 	      return _react2.default.createElement(
 	        'div',
@@ -166,44 +144,7 @@
 	            })
 	          )
 	        ),
-	        _react2.default.createElement(
-	          _reactThreeRenderer2.default
-	          // this points to the perspectiveCamera which has the name set to "camera" below
-	          ,
-	          { mainCamera: 'camera',
-	            width: width,
-	            height: height,
-
-	            onAnimate: this._onAnimate
-	          },
-	          _react2.default.createElement(
-	            'scene',
-	            null,
-	            _react2.default.createElement('perspectiveCamera', {
-	              name: 'camera',
-	              fov: 75,
-	              aspect: width / height,
-	              near: 0.1,
-	              far: 1000,
-
-	              position: this.cameraPosition
-	            }),
-	            _react2.default.createElement(
-	              'mesh',
-	              {
-	                rotation: this.state.cubeRotation
-	              },
-	              _react2.default.createElement('boxGeometry', {
-	                width: 1,
-	                height: 1,
-	                depth: 1
-	              }),
-	              _react2.default.createElement('meshBasicMaterial', {
-	                color: 0x00ff00
-	              })
-	            )
-	          )
-	        )
+	        _react2.default.createElement(_Visualizer2.default, null)
 	      );
 	    }
 	  }]);
@@ -98948,6 +98889,133 @@
 	}(_Object3DDescriptor3.default);
 
 	module.exports = GridHelperDescriptor;
+
+/***/ },
+/* 301 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(2);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactThreeRenderer = __webpack_require__(174);
+
+	var _reactThreeRenderer2 = _interopRequireDefault(_reactThreeRenderer);
+
+	var _three = __webpack_require__(177);
+
+	var _three2 = _interopRequireDefault(_three);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var Visualizer = function (_React$Component) {
+	  _inherits(Visualizer, _React$Component);
+
+	  function Visualizer() {
+	    _classCallCheck(this, Visualizer);
+
+	    var _this = _possibleConstructorReturn(this, (Visualizer.__proto__ || Object.getPrototypeOf(Visualizer)).call(this));
+
+	    _this.cameraPosition = new _three2.default.Vector3(0, 0, 5);
+
+	    _this.state = {
+	      cubeRotation: new _three2.default.Euler()
+	    };
+
+	    _this._onAnimate = function () {
+	      // we will get this callback every frame
+	      // pretend cubeRotation is immutable.
+	      // this helps with updates and pure rendering.
+	      // React will be sure that the rotation has now updated.
+	      _this.setState({
+	        cubeRotation: new _three2.default.Euler(_this.state.cubeRotation.x + 0.01, 0, 0)
+	      });
+	    };
+	    return _this;
+	  }
+
+	  _createClass(Visualizer, [{
+	    key: 'render',
+	    value: function render() {
+	      var width = window.innerWidth; // canvas width
+	      var height = window.innerHeight; // canvas height
+	      return _react2.default.createElement(
+	        _reactThreeRenderer2.default
+	        // this points to the perspectiveCamera which has the name set to "camera" below
+	        ,
+	        { mainCamera: 'camera',
+	          width: width,
+	          height: height,
+	          antialias: true,
+	          clearColor: 0x48B3B5,
+	          onAnimate: this._onAnimate
+	        },
+	        _react2.default.createElement(
+	          'scene',
+	          null,
+	          _react2.default.createElement('perspectiveCamera', {
+	            name: 'camera',
+	            fov: 75,
+	            aspect: width / height,
+	            near: 0.1,
+	            far: 1000,
+
+	            position: this.cameraPosition
+
+	          }),
+	          _react2.default.createElement(
+	            'mesh',
+	            {
+	              rotation: this.state.cubeRotation
+	            },
+	            _react2.default.createElement('boxGeometry', {
+	              width: 2,
+	              height: 1,
+	              depth: 1
+	            }),
+	            _react2.default.createElement('meshBasicMaterial', {
+	              color: 0xCC15A5
+	            })
+	          )
+	        )
+	      );
+	    }
+	  }]);
+
+	  return Visualizer;
+	}(_react2.default.Component);
+
+	// <mesh
+	//   rotation={this.state.cubeRotation}
+	// >
+	//   <boxGeometry
+	//     width={2}
+	//     height={1}
+	//     depth={1}
+	//   />
+	//   <meshBasicMaterial
+	//     wireframe
+	//     color={0xCCB815}
+	//   />
+	// </mesh>
+	//
+
+
+		exports.default = Visualizer;
 
 /***/ }
 /******/ ]);

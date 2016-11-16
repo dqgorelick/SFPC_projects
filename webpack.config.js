@@ -12,12 +12,6 @@ module.exports = {
     filename: 'bundle.js',
     publicPath: '/public/dist/'
   },
-  resolve: {
-      alias: {},
-      modulesDirectories: [
-        'node_modules'
-      ]
-    },
   plugins: [
     new ExtractTextPlugin('main.css', {
       allChunks: true,
