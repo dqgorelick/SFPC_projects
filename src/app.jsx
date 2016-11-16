@@ -50,7 +50,7 @@ class App extends React.Component {
             </ul>
           }
         </div>
-        <Visualizer />
+        <Visualizer/>
       </div>
     );
   }

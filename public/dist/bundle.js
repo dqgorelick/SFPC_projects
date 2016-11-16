@@ -98999,22 +98999,6 @@
 	  return Visualizer;
 	}(_react2.default.Component);
 
-	// <mesh
-	//   rotation={this.state.cubeRotation}
-	// >
-	//   <boxGeometry
-	//     width={2}
-	//     height={1}
-	//     depth={1}
-	//   />
-	//   <meshBasicMaterial
-	//     wireframe
-	//     color={0xCCB815}
-	//   />
-	// </mesh>
-	//
-
-
 		exports.default = Visualizer;
 
 /***/ }

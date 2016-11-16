@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <title>Midnight Flight Over Tokyo</title>
+        <script type="text/javascript" src="./javascripts/vendor/three.min.js"></script>
         <style>
             html, body {
                 margin: 0;
@@ -26,7 +27,16 @@
         </style>
     </head>
     <body>
-        <div id="app"></div>
-        <script src="./dist/bundle.js"></script>
+        <div class="dev-notes">
+            <h1>Midnight Flight Over Tokyo</h1>
+            <p>Notes from server:</p>
+            <ul id="notes">
+
+            </ul>
+        </div>
+        <div id="canvas"></div>
+        <script src="./javascripts/index.js"></script>
+        <!-- <div id="app"></div> -->
+        <!-- <script src="./dist/bundle.js"></script> -->
     </body>
 </html>
