@@ -8,11 +8,21 @@
       body, html {
         margin: 0;
       }
-      #canvas {
+      .buttons {
+        position: absolute;
+        z-index: 99999;
+      }
+      .canvas-wrapper {
         width: 100%;
         height: 100vh;
         position: relative;
         background-color: rgba(247, 245, 218, 0.69);
+      }
+      #canvas {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        z-index: 99;
       }
       .note{
         /*border: 1px black solid;*/
@@ -25,17 +35,38 @@
       }
       .note:hover {
         opacity: 1;
+        cursor: pointer;
+      }
+      .note.active {
+        opacity: 1;
+      }
+      #player {
+        position: absolute;
+      }
+      #player span {
+        z-index: 9;
+        -webkit-transition: all 800ms cubic-bezier(0.455, 0.03, 0.515, 0.955);
+          transition:         all 800ms cubic-bezier(0.455, 0.03, 0.515, 0.955);
+        -webkit-transition-delay: 100ms;
+        transition-delay: 100ms;
+        position: absolute;
+        background-color:#57AA83;
+        opacity: 0.4;
+        border-radius: 100%;
       }
     </style>
 </head>
 
 <body>
-    <button id="start">start</button>
-    <button id="stop">stop</button>
-    <div id='canvas'>
-      <span class="note" id='C4'>C4</span>
-      <span class="note" id='E4'>E4</span>
-      <span class="note" id='G4'>G4</span>
+    <div class="buttons">
+        <button id="start">start</button>
+        <button id="stop">stop</button>
+    </div>
+    <div class="canvas-wrapper">
+      <div id="canvas"></div>
+      <div id="player">
+          <span></span>
+      </div>
     </div>
     <script src="./javascripts/flute.js"></script>
 </body>
