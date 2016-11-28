@@ -33,7 +33,7 @@ void mouseDragged() {
  background(amp*255);
 }
 void mousePressed() {
-  OscMessage msg = new OscMessage("/on");
+  OscMessage msg = new OscMessage("/test");
   osc.send(msg, supercollider);
 }
 

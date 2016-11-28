@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title></title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <style>
+      body, html {
+        margin: 0;
+      }
+      #canvas {
+        width: 100%;
+        height: 100vh;
+        position: relative;
+        background-color: rgba(247, 245, 218, 0.69);
+      }
+      .note{
+        /*border: 1px black solid;*/
+        /*border-radius: 100%;*/
+        position: absolute;
+        top: 150px;
+        -webkit-transition: all 25ms cubic-bezier(0.23, 1, 0.32, 1);
+        transition:         all 25ms cubic-bezier(0.23, 1, 0.32, 1);
+        opacity: 0.75;
+      }
+      .note:hover {
+        opacity: 1;
+      }
+    </style>
+</head>
+
+<body>
+    <button id="start">start</button>
+    <button id="stop">stop</button>
+    <div id='canvas'>
+      <span class="note" id='C4'>C4</span>
+      <span class="note" id='E4'>E4</span>
+      <span class="note" id='G4'>G4</span>
+    </div>
+    <script src="./javascripts/flute.js"></script>
+</body>
+
+</html>

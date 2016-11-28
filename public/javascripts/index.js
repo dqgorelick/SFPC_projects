@@ -13,7 +13,6 @@ var notes;
 function findPolarCoordinates(note, steps) {
     var result = parseInt(note)/steps * 2 * Math.PI;
     var pos = {x: Math.sin(result)*RADIUS, y: Math.cos(result)*RADIUS};
-    console.log('pos',pos);
     return (pos);
 }
 
@@ -23,9 +22,7 @@ function findPolarCoordinates(note, steps) {
 var socket = new WebSocket('ws://0.0.0.0:8081/');
 
 socket.onmessage = function(evt) {
-    // console.log('evt.data',evt.data);
     var result = JSON.parse(evt.data);
-    console.log('result', result);
     notes = result.data.args;
     document.getElementById('notes').innerHTML = (function() {
         html = '';
@@ -52,6 +49,11 @@ var container,
     fov = 2,
     noteCubes = [];
 
+
+    var spheres = [];
+
+    var directionalLight, pointLight;
+
 init();
 animate();
 
@@ -59,7 +61,6 @@ function init() {
 
 
 
-    console.log('hello world?');
     // grab the container from the DOM
     container = document.getElementById('canvas');
 
@@ -70,7 +71,7 @@ function init() {
         window.innerWidth / window.innerHeight,
         1,
         10000);
-    camera.position.z = 100;
+    camera.position.z = 200;
     camera.target = new THREE.Vector3(0, 0, 0);
 
     scene = new THREE.Scene();
@@ -79,7 +80,9 @@ function init() {
 
     uniforms = {
         time:       { value: 1.0 },
-        resolution: { value: new THREE.Vector2() }
+        resolution: { value: new THREE.Vector2() },
+        u_time:       { value: 1.0 },
+        u_resolution: { value: new THREE.Vector2() }
     };
 
     var background_material = new THREE.ShaderMaterial( {
@@ -91,15 +94,14 @@ function init() {
     } );
 
 
-    var background = new THREE.Mesh( new THREE.PlaneBufferGeometry( 10, 10 ) , background_material );
-    background.position.z = -4;
-    console.log('background.position.z',background.position.z);
+    var background = new THREE.Mesh( new THREE.PlaneBufferGeometry( 9, 9 ) , background_material );
+    background.position.z = -10;
     scene.add(background);
 
     // circle
     var circle_material = new THREE.MeshBasicMaterial({
 
-        color: 0xB527BC,
+        color: 0x000000,
         wireframe: true,
     });
 
@@ -110,10 +112,22 @@ function init() {
     var circle = new THREE.Mesh( circleGeometry, circle_material );
     scene.add( circle );
 
+
     // cube
-    cube_material = new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } );
+    // cube_material = new THREE.MeshLambertMaterial({
+    //     color: 0xffff00
+    // });
+    cube_material = new THREE.MeshPhongMaterial( {
+        color: 0xFF9E65,
+        emissive: 0x000000,
+        side: THREE.DoubleSide,
+        shading: THREE.FlatShading
+    } )
+    // var cube_material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+
 
     var geometry = new THREE.BoxGeometry(NOTE_CUBE_RADIUS, NOTE_CUBE_RADIUS, NOTE_CUBE_RADIUS);
+    // var geometry = new THREE.SphereGeometry( 0.2, 10, 10 );
 
     for (var i = 0; i < NUMBER_OF_NOTES; i++) {
         noteCubes[i] = new THREE.Mesh(
@@ -121,12 +135,24 @@ function init() {
             cube_material
         );
         var pos = findPolarCoordinates(i, NUMBER_OF_NOTES);
-        console.log('pos',pos);
         noteCubes[i].position.x = pos.x;
         noteCubes[i].position.y = pos.y;
         scene.add(noteCubes[i]);
     }
 
+    // lights
+    var lights = [];
+    lights[ 0 ] = new THREE.PointLight( 0xffffff, 1, 0 );
+    lights[ 1 ] = new THREE.PointLight( 0xffffff, 1, 0 );
+    lights[ 2 ] = new THREE.PointLight( 0xffffff, 1, 0 );
+
+    lights[ 0 ].position.set( 0, 200, 0 );
+    lights[ 1 ].position.set( 100, 200, 100 );
+    lights[ 2 ].position.set( - 100, - 200, - 100 );
+
+    scene.add( lights[ 0 ] );
+    scene.add( lights[ 1 ] );
+    scene.add( lights[ 2 ] );
 
     renderer = new THREE.WebGLRenderer();
     renderer.setPixelRatio( window.devicePixelRatio );
@@ -147,7 +173,6 @@ function onWindowResize( event ) {
 }
 
 function animate() {
-    console.log('hello rendereing');
     requestAnimationFrame( animate );
     render();
 
@@ -160,7 +185,7 @@ function render() {
         notes.forEach(function(n, i) {
             noteCubes[n%8].rotation.x += 0.01;
             noteCubes[n%8].rotation.y += 0.01;
-
+            noteCubes[n%8].position.z += 0.1   ;
         });
     }
 

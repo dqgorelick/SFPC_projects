@@ -13,8 +13,14 @@ var wss = new WebSocket.Server({
     server: server
 });
 
-wss.on('connection', function (socket) {
+wss.on('connection', function (ws) {
     console.log('A Web Socket connection has been established!');
+    ws.on('message', function(event) {
+        udpPort.send({
+            address: '/test',
+            args: event
+        });
+    })
 });
 
 wss.broadcast = (data) => {
@@ -42,7 +48,9 @@ var getIPAddresses = function () {
 // Bind to a UDP socket to listen for incoming OSC events.
 var udpPort = new osc.UDPPort({
     localAddress: '0.0.0.0',
-    localPort: 57121
+    localPort: 57121,
+    remoteAddress: "127.0.0.1",
+    remotePort: 57120
 });
 
 udpPort.on('ready', function () {
@@ -57,7 +65,7 @@ udpPort.on('ready', function () {
 udpPort.open();
 
 udpPort.on('message', function (oscMsg) {
-    console.log('An OSC Message was received!', oscMsg);
+    console.log(`An OSC Message was received! ${JSON.stringify(oscMsg)}`);
     if (oscMsg.address === '/notes') {
         wss.broadcast(JSON.stringify({data: oscMsg}));
     }

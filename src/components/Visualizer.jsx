@@ -5,7 +5,7 @@ import THREE from 'three';
 
 class Visualizer extends React.Component {
   constructor() {
-    super()
+    super();
     this.cameraPosition = new THREE.Vector3(0, 0, 5);
 
     this.state = {
