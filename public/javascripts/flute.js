@@ -1,6 +1,6 @@
 var CANVAS_TOP = 150; // get this from the css file from .note
 
-var TEST_SONG = [8,12,10,12,8,12,10,12,8,13,11,13,8,13,11,13];
+var TEST_SONG = [7,11,9,11,7,11,9,11,7,12,10,12,7,12,10,12];
 
 var MAJOR_SCALE = [0, 2, 4, 5, 7, 9, 11];
 
@@ -8,6 +8,7 @@ var BASE_NOTE = 48;
 var NOTE_DURATION = 200; // 0.2 second delay set in SuperCollider
 var STEPS = 16;
 
+var rotationAngle = 0;
 var notes = [];
 
 var player = {
@@ -58,14 +59,22 @@ function renderNotes() {
     })());
 }
 
+function rotatePlayer() {
+  rotationAngle += 180;
+  $('#player span').css('-webkit-transform', 'rotate(' + rotationAngle + 'deg)');
+  // $('#player span').css('-moz-transform', 'rotate(' + rotationAngle + 'deg)');
+  // $('#player span').css('-o-transform', 'rotate(' + rotationAngle + 'deg)');
+  // $('#player span').css('-ms-transform', 'rotate(' + rotationAngle + 'deg)');
+  $('#player span').css('transform:','rotate(' + rotationAngle + 'deg)');
+}
+
 function updatePlayer(songIndex, cb) {
   // get next song index =
   var nextIndex = (songIndex + 1) % TEST_SONG.length;
 
   // get actual note mappings
-  // TODO subtract one from TEST_SONG values
-  var current = TEST_SONG[songIndex] - 1;
-  var next = TEST_SONG[nextIndex] - 1;
+  var current = TEST_SONG[songIndex];
+  var next = TEST_SONG[nextIndex];
 
   console.log('current',current);
   console.log('next',next);
@@ -121,11 +130,22 @@ $(document).ready(function() {
     clearTimeout(meter);
   });
 
+  $('#rotate').on('click', function() {
+    console.log('rotate');
+    // $('#player span').addClass('rotate');
+    rotatePlayer()
+  });
+
+  $('#rotate2').on('click', function() {
+    console.log('rotate2');
+    $('#player span').removeClass('rotate');
+  });
+
   function playSong() {
     var songIndex = 0;
     function nextNote() {
       // TODO subtract one from each note in TEST_SONG and don't hardcode the octave shift
-      var midiNote = 12 + BASE_NOTE + MAJOR_SCALE[(TEST_SONG[songIndex] - 1) % 7];
+      var midiNote = 12 + BASE_NOTE + MAJOR_SCALE[(TEST_SONG[songIndex]) % 7];
       sendNote(midiNote);
       songIndex++;
 
@@ -137,10 +157,11 @@ $(document).ready(function() {
       }, NOTE_DURATION);
 
       // player logic
-      updatePlayer(songIndex, renderPlayer);
+      rotatePlayer();
+      setTimeout(updatePlayer(songIndex, renderPlayer), 250);
 
       if (songIndex === TEST_SONG.length) songIndex = 0;
-      meter = setTimeout(nextNote, 500);
+      meter = setTimeout(nextNote, 250);
     }
 
     nextNote();
