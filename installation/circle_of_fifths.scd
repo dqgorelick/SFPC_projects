@@ -1,3 +1,6 @@
+s.quit;
+s.boot;
+
 (
 SynthDef(\bpfsaw, {
 	arg atk=2, sus=0, rel=3, c1=1, c2=(-1),
@@ -25,7 +28,7 @@ SynthDef(\bpfsaw, {
 (
 ~chords = Pbind(
 	\instrument, \bpfsaw,
-	\dur, Pwhite(2.4,5,inf),
+	\dur, Pwhite(4,7,inf),
 	\midinote, Pxrand([
 		[54,61,56],
 		[23,35,54,59,61,64],
@@ -39,7 +42,7 @@ SynthDef(\bpfsaw, {
 	\atk, Pwhite(1.0,1.5,inf),
 	\rel, Pwhite(6.5,10.0,inf),
 	\ldb, 6,
-	\amp, 0.5,
+	\amp, 1,
 	\out, 0,
 	\prevFreq, Pfunc({|evt|
 		evt[\midinote].postln;

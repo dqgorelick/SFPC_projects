@@ -28,7 +28,7 @@ a = Scale.major;
 
 a = Scale.minor;
 ~b = NetAddr.new("127.0.0.1", 57121);
-n = 42;
+n = 48;
 
 
 

@@ -18,7 +18,7 @@ SynthDef(\bpfsaw, {
 		{LFNoise1.kr(
 			LFNoise1.kr(4).exprange(cfhzmin, cfhzmax)
 		).exprange(cfmin, cfmax)}!2,
-		{LFNoise1.kr(0.1).e xprange(rqmin, rqmax)}!2
+		{LFNoise1.kr(0.1).exprange(rqmin, rqmax)}!2
 	);
 	sig = BLowShelf.ar(sig, lsf, 0.5, ldb);
 	sig = Balance2.ar(sig[0], sig[1], pan);
@@ -68,7 +68,7 @@ Romanian Minor
 
 a = Scale.major;
 ~b = NetAddr.new("127.0.0.1", 57121);
-n = 40;
+n = 42;
 c = 0;
 
 Scale.mixolydian
@@ -79,10 +79,10 @@ Scale.directory
 	\dur, Pwhite(4.5, 7.0 ,inf),
 	\degree, Pseq([
 		[8, 12, 10],
-		[8, 12, 10],
-		// [-10, -3, 8, 11, 12, 14],
+		// [8, 12, 10],
+		[-10, -3, 8, 11, 12, 14],
 		[1, 7, 10, 12, 13],
-		// [-7, 0, 2, 4, 5, 7],
+		[-7, 0, 2, 4, 5, 7],
 	], inf),
 	\scale, Pfunc({ a }, inf),
 	\root, Pfunc({ n - 60}, inf),
@@ -91,16 +91,12 @@ Scale.directory
 		evt[\degree].postln;
 		c = c + 1;
 		if (c % 4 == 0) {
-			"hello".postln;
 			a = Scale.choose(7, 12);
 			if (c % 8 == 0) {
 				n = rrand(32,46);
 			}
-		} {
-			"goodbye".postln;
 		};
  		c.postln;
-		evt[\midinote].postln;
 		~b.sendMsg("/notes", *evt[\midinote]);
 	}),
 	\detune, Pexprand(0.05,0.2,inf),

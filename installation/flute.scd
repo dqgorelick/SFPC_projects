@@ -1,9 +1,9 @@
 Server.local.boot;
-
+s.quit;
 // start server for OSC
 ~b = NetAddr.new("127.0.0.1", 57121);
 
-
+s.plotTree;
 
 ~x = Synth.new(\waveguideFlute, [\freq, 220, \dur, 0.2,\amp, 0.5]);
 ~x = Synth.new(\waveguideFlute, [\freq, 440, \dur, 0.2,\amp, 0.5]);
