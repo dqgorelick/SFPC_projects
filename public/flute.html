@@ -40,10 +40,10 @@
       .note.active {
         opacity: 1;
       }
-      #player {
+      .player {
         position: absolute;
       }
-      #player span {
+      .player span {
         z-index: 9;
         /*-webkit-transition: all 500ms cubic-bezier(0.455, 0.03, 0.515, 0.955);
           transition:         all 500ms cubic-bezier(0.455, 0.03, 0.515, 0.955);*/
@@ -82,13 +82,7 @@
     </div>
     <div class="canvas-wrapper">
       <div id="canvas"></div>
-      <div id="player">
-          <span>
-            <div class="cursor-wrapper">
-              <div class="cursor"></div>
-            </div>
-          </span>
-      </div>
+      <div class="players"></div>
     </div>
     <script src="./javascripts/flute.js"></script>
 </body>

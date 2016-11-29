@@ -1,26 +1,37 @@
-var CANVAS_TOP = 225; // get this from the css file from .note
+var DEFAULT_BASE_NOTE = 48;
+var DEFAULT_SONG_RATE = 450;
 
 var TEST_SONG = [7,11,9,11,7,11,9,11,7,12,10,12,7,12,10,12];
-
 var MAJOR_SCALE = [0, 2, 4, 5, 7, 9, 11];
 
-var BASE_NOTE = 48;
-var SONG_RATE = 1000;
-
-var NOTE_DURATION = 200; // 0.2 second delay set in SuperCollider
-
+var CANVAS_TOP = 225; // get this from the css file from .note
 var STEPS = 16;
+var NOTE_DURATION = 200; // 0.2 second delay set in SuperCollider
 
 var notes = [];
 
-Player = function (sendNote) {
+Player = function (id, baseNote, songRate, sendNote) {
+  this.id = id;
   this.leftHand = null;
   this.rightHand = null;
+  this.baseNote = baseNote || DEFAULT_BASE_NOTE;
+  this.songRate = songRate || DEFAULT_SONG_RATE;
   this.meter = null;
   this.sendNote = sendNote;
   this.songIndex = 0;
   this.noteCount = 0;
-  console.log('this.sendNote',this.sendNote);
+
+  // create player span
+  $('.players').append(
+    '<div class="player" id="'+this.id+'"><span><div class="cursor-wrapper"><div class="cursor"></div></div></span></div>'
+  );
+
+  this.self = $('#'+this.id+' span');
+
+  this.self.css('-webkit-transition', 'all ' + this.songRate + 'ms linear');
+  this.self.css('transition', 'all ' + this.songRate + 'ms linear');
+
+  console.log('this.songRate',this.songRate);
 }
 
 Player.prototype.start = function() {
@@ -28,7 +39,7 @@ Player.prototype.start = function() {
   var that = this;
   function nextNote() {
     // TODO subtract one from each note in TEST_SONG and don't hardcode the octave shift
-    var midiNote = 12 + BASE_NOTE + MAJOR_SCALE[(TEST_SONG[that.songIndex]) % 7];
+    var midiNote = 12 + that.baseNote + MAJOR_SCALE[(TEST_SONG[that.songIndex]) % 7];
 
     // get actual note mappings
     var current = TEST_SONG[that.songIndex];
@@ -58,12 +69,12 @@ Player.prototype.start = function() {
 
     that.render();
     // play note
-    console.log('midiNote',midiNote);
     that.sendNote(midiNote);
     animateNote(midiNote);
 
+    console.log('this.songRate',that.songRate);
     // recursive call at SONG_RATE
-    that.meter = setTimeout(nextNote, SONG_RATE);
+    that.meter = setTimeout(nextNote, that.songRate);
 
     that.noteCount++;
     that.songIndex++;
@@ -74,16 +85,16 @@ Player.prototype.start = function() {
 }
 
 Player.prototype.render = function() {
-  $('#player span').css('-webkit-transform', 'rotate(' + (this.noteCount + 1)* 180 + 'deg)');
-  $('#player span').css('transform:','rotate(' + (this.noteCount + 1) * 180 + 'deg)');
+  this.self.css('-webkit-transform', 'rotate(' + (this.noteCount + 1)* 180 + 'deg)');
+  this.self.css('transform:','rotate(' + (this.noteCount + 1) * 180 + 'deg)');
 
   var diameter = this.rightHand.center - this.leftHand.center;
   var top = CANVAS_TOP + this.leftHand.width/2 - diameter/2;
   var left = this.leftHand.center;
-  $('#player span').css('top', top);
-  $('#player span').css('left', left);
-  $('#player span').css('height', diameter);
-  $('#player span').css('width', diameter);
+  this.self.css('top', top);
+  this.self.css('left', left);
+  this.self.css('height', diameter);
+  this.self.css('width', diameter);
 }
 
 Player.prototype.stop = function() {
@@ -98,7 +109,7 @@ function createNotes(baseNote, cb) {
     var noteWidth = maxWidth / STEPS;
     notes[i] = {
       id: i,
-      midi: BASE_NOTE + (i < 7 ? 0 : (i > 13 ? 24 : 12)) + MAJOR_SCALE[(i % MAJOR_SCALE.length)],
+      midi: DEFAULT_BASE_NOTE + (i < 7 ? 0 : (i > 13 ? 24 : 12)) + MAJOR_SCALE[(i % MAJOR_SCALE.length)],
       left: noteWidth*i,
       width: noteWidth,
       height: noteWidth,
@@ -133,14 +144,13 @@ function renderNotes() {
 
 function initializeSettings() {
   $('.note').css('top', CANVAS_TOP);
-  $('#player span').css('-webkit-transition', 'all ' + SONG_RATE + 'ms linear');
-  $('#player span').css('transition', 'all ' + SONG_RATE + 'ms linear');
 }
 
 
 function animateNote(note) {
   // note transition
   var activeNote = $('#'+note);
+  console.log('activeNote',activeNote);
   activeNote.addClass('active');
   setTimeout(function() {
     activeNote.removeClass('active');
@@ -164,11 +174,11 @@ $(document).ready(function() {
   /*
     INITIALIZE
    */
-  createNotes(BASE_NOTE, renderNotes);
+  createNotes(DEFAULT_BASE_NOTE, renderNotes);
   initializeSettings();
 
   // create sequencer
-  var mozart = new Player(sendNote);
+  var mozart = new Player('mozart', 48, 500, sendNote);
 
   $('#start').on('click', function() {
     mozart.start();
