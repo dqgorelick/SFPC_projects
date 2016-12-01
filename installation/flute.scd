@@ -5,8 +5,8 @@ s.quit;
 
 s.plotTree;
 
-~x = Synth.new(\waveguideFlute, [\freq, 220, \dur, 0.2,\amp, 0.5]);
-~x = Synth.new(\waveguideFlute, [\freq, 440, \dur, 0.2,\amp, 0.5]);
+~x = Synth.new(\waveguideFlute, [\freq, 220, \dur, 0.2,\amp, 0.2]);
+~x = Synth.new(\waveguideFlute, [\freq, 440, \dur, 0.2,\amp, 0.2]);
 x.set(\freq, 220);
 (
 OSCdef.new(
@@ -16,7 +16,7 @@ OSCdef.new(
 		(msg[1].asInteger).postln;
 		n = msg[1];
 		n.postln;
-		Synth.new(\waveguideFlute, [\freq, msg[1].asInteger.midicps, \dur, 0.2, \amp, 0.5]);
+		Synth.new(\waveguideFlute, [\freq, msg[1].asInteger.midicps, \dur, 0.2, \amp, 0.1]);
 	},
 	'/test'
 );

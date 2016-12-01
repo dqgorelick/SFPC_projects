@@ -5,13 +5,37 @@
     <title></title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     <style>
+      *, *:before, *:after {
+        -webkit-box-sizing: inherit;
+        -moz-box-sizing: inherit;
+        box-sizing: inherit;
+        }
       body, html {
         margin: 0;
+        font-family: sans-serif;
       }
       .buttons {
         position: absolute;
+        bottom: 0;
+        left: 0;
         z-index: 99999;
       }
+      .buttons > div {
+        padding: 10px;
+        display: inline-block;
+      }
+      .button {
+        display: inline-block;
+        padding: 5px 10px;
+        background-color: rgba(100,100,100,1);
+        opacity: 0.6;
+        cursor: pointer;
+        color: #fff;
+      }
+      .button:hover {
+        opacity: 1;
+      }
+
       .canvas-wrapper {
         width: 100%;
         height: 100vh;
@@ -22,7 +46,7 @@
         width: 100%;
         height: 100%;
         position: absolute;
-        z-index: 99;
+        /*z-index: 99;*/
       }
       .note{
         /*border: 1px black solid;*/
@@ -44,16 +68,10 @@
         position: absolute;
       }
       .player span {
-        z-index: 9;
-        /*-webkit-transition: all 500ms cubic-bezier(0.455, 0.03, 0.515, 0.955);
-          transition:         all 500ms cubic-bezier(0.455, 0.03, 0.515, 0.955);*/
-        /*-webkit-transition: all 500ms linear;*/
-        /*transition:         all 500ms linear;*/
-        /*-webkit-transition-delay: 100ms;*/
-        /*transition-delay: 100ms;*/
+        /*z-index: 9;*/
         position: absolute;
-        background-color:#57AA83;
-        opacity: 0.4;
+        /*border: 10px rgba(0,0,0,1) solid;*/
+        opacity: 0.8;
         border-radius: 100%;
       }
 
@@ -61,7 +79,6 @@
         width: 100%;
         height: 100%;
         position: relative;
-        /*background-color: rgba(0,0,0,0.2);*/
       }
 
       .cursor {
@@ -88,9 +105,25 @@
 
 <body>
     <div class="buttons">
-        <button id="start">start</button>
-        <button id="stop">stop</button>
-        <button id="circles">circles</button>
+        <div>
+          <p>mozart</p>
+          <div class="button" id="start-mozart">start</div>
+          <div class="button" id="stop-mozart">stop</div>
+        </div>
+        <div>
+          <p>djorak</p>
+          <div class="button" id="start-dvorak">start</div>
+          <div class="button" id="stop-dvorak">stop</div>
+        </div>
+        <div>
+          <p>bach</p>
+          <div class="button" id="start-bach">start</div>
+          <div class="button" id="stop-bach">stop</div>
+        </div>
+        <div>
+          <p>settings</p>
+          <div class="button" id="circles">circles</div>
+        </div>
     </div>
     <div class="canvas-wrapper">
       <div id="canvas"></div>

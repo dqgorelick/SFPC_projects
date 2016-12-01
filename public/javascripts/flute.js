@@ -3,9 +3,16 @@
 var DEFAULT_BASE_NOTE = 48;
 var DEFAULT_SONG_RATE = 450;
 
-var TEST_SONG = [7,11,9,11,7,11,9,11,7,12,10,12,7,12,10,12];
-var TEST_SONG_HARMONY = [0, 2, 4, 2, 0, 2, 4, 2, 0, 3, 5, 3, 0, 3, 5, 3];
+// var TEST_SONG = [7,11,9,11,7,11,9,11,7,12,10,12,7,12,10,12];
+var TEST_SONG = [7,11,9,11,7,12,10,12];
+// var TEST_SONG_HARMONY = [0, 2, 4, 2, 0, 2, 4, 2, 0, 3, 5, 3, 0, 3, 5, 3];
+var TEST_SONG_HARMONY = [4, 0, 2, 0, 4, 0, 2, 0, 5, 3, 4, 3, 5, 3, 4, 3];
+var CLIMBING_SONG_1 = [0,2,1,3,2,4,3,5,4,6,5,7,6,8,7,9,8,10,9,11,10,12,11,13,12,14];
+// var CLIMBING_SONG_2 = [1,3,2,4,3,5,4,6,5,7,6,8,7,9,8,10,9,11,10,12,11,13,12,14,13,15];
+var CLIMBING_SONG_2 = [0,2,4,6,7,9,11,13,14];
+
 var MAJOR_SCALE = [0, 2, 4, 5, 7, 9, 11];
+var MINOR_SCALE = [0, 2, 3, 5, 7, 8, 10];
 
 var CANVAS_TOP = 225; // get this from the css file from .note
 var CURSOR_WIDTH = 26;
@@ -37,28 +44,25 @@ var Player = function (id, options, sendNote) {
       orientation: CURSOR_RIGHT
     },
     2: {
-      rotation: CW,
-      orientation: CURSOR_RIGHT
-    },
-    3: {
-      rotation: CCW,
-      orientation: CURSOR_LEFT
-    },
-    4: {
       rotation: CCW,
       orientation: CURSOR_LEFT
     }
   }
-
   // create player span
   $('.players').append(
     '<div class="player" id="'+this.id+'"><span><div class="cursor-wrapper"><div class="cursor"></div><div class="cursor-right"></div></div></span></div>'
   );
   this.jQuery = $('#'+this.id+' span');
+  this.cursorRight = this.jQuery.find('.cursor-right');
+  this.cursorLeft = this.jQuery.find('.cursor');
+
+
   // this.jQuery.css('-webkit-transition', 'all ' + this.songRate + 'ms linear');
   // this.jQuery.css('transition', 'all ' + this.songRate + 'ms linear');
   this.jQuery.css('-webkit-transition', '-webkit-transform ' + this.songRate + 'ms linear');
   this.jQuery.css('transition', 'transform ' + this.songRate + 'ms linear');
+  this.cursorRight.css('background-color', options.color);
+  this.cursorLeft.css('background-color', options.color);
 }
 Player.prototype.start = function() {
   var self = this;
@@ -67,7 +71,7 @@ Player.prototype.start = function() {
     var current = self.song[self.songIndex];
 
     // TODO subtract one from each note in TEST_SONG and don't hardcode the octave shift
-    var midiNote = (current > 6 ? 12 : 0) + self.baseNote + MAJOR_SCALE[(current) % 7];
+    var midiNote = (current < 7 ? 0 : (current > 13 ? 24 : 12)) + self.baseNote + MINOR_SCALE[(current) % 7];
 
     var next = self.song[(self.songIndex + 1) % self.song.length];
     var next_2 = self.song[(self.songIndex + 2) % self.song.length];
@@ -84,16 +88,10 @@ Player.prototype.start = function() {
     } else {
       switch(self.state) {
         case 1:
-          self.state = (self.toFlip ? 3 : 2);
+          self.state = (self.toFlip ? 2 : 1);
           break;
         case 2:
-          self.state = (self.toFlip ? 4 : 1);
-          break;
-        case 3:
-          self.state = (self.toFlip ? 1 : 4);
-          break;
-        case 4:
-          self.state = (self.toFlip ? 2 : 3);
+          self.state = (self.toFlip ? 1 : 2);
           break;
         default:
           console.error('invalid state reached');
@@ -136,21 +134,20 @@ Player.prototype.start = function() {
   }
 }
 Player.prototype.render = function() {
-
   var params = this.states[this.state];
   this.rotationCount += params.rotation;
   this.jQuery.css('-webkit-transform', 'rotate(' + (this.rotationCount)*180 + 'deg)');
   this.jQuery.css('transform:','rotate(' + (this.rotationCount)*180 + 'deg)');
 
   if (params.orientation === CURSOR_LEFT) {
-    this.jQuery.find('.cursor-right').css('display','initial')
-    this.jQuery.find('.cursor').css('display','none')
+    this.cursorRight.css('display','initial')
+    this.cursorLeft.css('display','none')
   } else {
-    this.jQuery.find('.cursor-right').css('display','none')
-    this.jQuery.find('.cursor').css('display','initial')
+    this.cursorRight.css('display','none')
+    this.cursorLeft.css('display','initial')
   }
   var diameter = this.rightHand.center - this.leftHand.center;
-  var top = CANVAS_TOP + this.leftHand.width/2 - diameter/2;
+  var top = CANVAS_TOP + this.leftHand.width/4 - diameter/2;
   var left = this.leftHand.center;
   this.jQuery.css('top', top);
   this.jQuery.css('left', left);
@@ -162,6 +159,14 @@ Player.prototype.stop = function() {
   this.playing = false;
 }
 
+// var Conductor = function() {
+//   this.baseTempo = 300;
+//   this.players = [];
+// }
+// Conductor.prototype.createPlayer() {
+
+// }
+
 // create the note objects
 function createNotes(baseNote, cb) {
   var maxWidth = window.innerWidth;
@@ -169,10 +174,11 @@ function createNotes(baseNote, cb) {
     var noteWidth = maxWidth / STEPS;
     notes[i] = {
       id: i,
-      midi: DEFAULT_BASE_NOTE + (i < 7 ? 0 : (i > 13 ? 24 : 12)) + MAJOR_SCALE[(i % MAJOR_SCALE.length)],
+      midi: DEFAULT_BASE_NOTE + (i < 7 ? 0 : (i > 13 ? 24 : 12)) + MINOR_SCALE[(i % MINOR_SCALE.length)],
       left: noteWidth*i,
       width: noteWidth,
-      height: noteWidth,
+      height: noteWidth / 2,
+      top: noteWidth/4,
       center: noteWidth*i + noteWidth/2
     }
   }
@@ -190,9 +196,9 @@ function renderNotes() {
             'id="' + note.midi + '" ' +
             'style="' +
               'left:' + note.left + 'px;' +
+              'top:' + note.top + 'px;' +
               'width:' + note.width + 'px;' +
               'height:' + note.height + 'px;' +
-              // create hex background color
               'background-color:#' + parseInt((230*(iter/STEPS) + 16)).toString(16) + 'AAAA;' +
             '" ' +
           '></div>'
@@ -236,26 +242,53 @@ $(document).ready(function() {
   createNotes(DEFAULT_BASE_NOTE, renderNotes);
   initializeSettings();
 
-
   /**
    * create Player class with
    * (id, options = {baseNote, songRate, song}, sendNote);
    */
-  var bach = new Player('bach', {songRate: 450, song:TEST_SONG}, sendNote);
-  var mozart = new Player('mozart', {songRate: 450, song:TEST_SONG_HARMONY}, sendNote);
+  var bach = new Player('bach', {songRate: 600, song:TEST_SONG, color:'#57AA83'}, sendNote);
 
-  $('#start').on('click', function() {
+  $('#start-bach').hover(function() {
     bach.start();
-    mozart.start();
   });
-
-  $('#stop').on('click', function() {
-    mozart.stop();
+  $('#stop-bach').hover(function() {
     bach.stop();
   });
 
-  var circles = true;
-  $('#circles').on('click', function() {
+  var mozart = new Player('mozart', {songRate: 300, song:CLIMBING_SONG_1, color:'#7A3126'}, sendNote);
+
+  $('#start-mozart').hover(function() {
+    mozart.start();
+  });
+  $('#stop-mozart').hover(function() {
+    mozart.stop();
+  });
+
+  var dvorak = new Player('dvorak', {songRate: 300, song:CLIMBING_SONG_2, color:'#7A2675'}, sendNote);
+
+  $('#start-dvorak').hover(function() {
+    dvorak.start();
+  });
+  $('#stop-dvorak').hover(function() {
+    dvorak.stop();
+  });
+
+
+  // $('#start').on('click', function() {
+  //   bach.start();
+  //   mozart.start();
+  //   setTimeout(function() {dvorak.start()}, 1200);
+
+  // });
+
+  // $('#stop').on('click', function() {
+  //   mozart.stop();
+  //   bach.stop();
+  //   dvorak.stop();
+  // });
+
+  var circles = false;
+  $('#circles').hover(function() {
     $('.player span').css('background-color', (circles ? 'rgba(0,0,0,0)' : '#57AA83'));
     circles = !circles;
   });

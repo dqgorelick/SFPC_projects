@@ -28,7 +28,7 @@ SynthDef(\bpfsaw, {
 (
 ~chords = Pbind(
 	\instrument, \bpfsaw,
-	\dur, Pwhite(4,7,inf),
+	\dur, Pwhite(5.2,7,inf),
 	\midinote, Pxrand([
 		[54,61,56],
 		[23,35,54,59,61,64],
