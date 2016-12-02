@@ -1,21 +1,27 @@
 var osc = require('osc')
 var express = require('express')
+
 var app = express()
+var router = express.Router();
 var WebSocket = require('ws')
 
 var PORT = 8081
+var COMM_PORT = 8082
 
 // Create an Express-based Web Socket server to which OSC messages will be relayed.
 var appResources = __dirname + '/public'
 var server = app.listen(PORT)
 
+
 var wss = new WebSocket.Server({
-    server: server
+    server: server,
+    port: COMM_PORT
 });
 
 wss.on('connection', function (ws) {
     console.log('A Web Socket connection has been established!');
     ws.on('message', function(event) {
+        console.log('event',event);
         udpPort.send({
             address: '/test',
             args: event
@@ -70,5 +76,15 @@ udpPort.on('message', function (oscMsg) {
         wss.broadcast(JSON.stringify({data: oscMsg}));
     }
 });
+
+app.use('/api/', router);
+router.route('/test').get(function(req, res) {
+    console.log('req.query',req.query);
+
+    wss.broadcast(JSON.stringify(req.query));
+    res.send('received!');
+
+});
+
 
 app.use('/', express.static(appResources));

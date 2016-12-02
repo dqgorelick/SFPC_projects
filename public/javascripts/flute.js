@@ -3,6 +3,7 @@
 var DEFAULT_BASE_NOTE = 48;
 var DEFAULT_SONG_RATE = 450;
 
+var MODES = { player: 1, song: 2 };
 // var TEST_SONG = [7,11,9,11,7,11,9,11,7,12,10,12,7,12,10,12];
 var TEST_SONG = [7,11,9,11,7,12,10,12];
 // var TEST_SONG_HARMONY = [0, 2, 4, 2, 0, 2, 4, 2, 0, 3, 5, 3, 0, 3, 5, 3];
@@ -26,17 +27,27 @@ var NOTE_DURATION = 200; // 0.2 second delay set in SuperCollider
 var notes = [];
 
 var Player = function (id, options, sendNote) {
+  // parameters
   this.id = id;
-  this.leftHand = null;
-  this.rightHand = null;
-  this.song = options.song || TEST_SONG;
-  this.playing = false;
   this.baseNote = options.baseNote || DEFAULT_BASE_NOTE;
   this.songRate = options.songRate || DEFAULT_SONG_RATE;
+  this.mode = options.mode || MODES.song;
+  console.log('this.mode',this.mode);
+  // socket callback
+  this.sendNote = sendNote;
+  // song mode
+  this.song = options.song || TEST_SONG;
+  this.songIndex = 0;
+  // player mode
+  this.lowerNote = Math.floor(Math.random()*10);
+  this.higherNote = this.lowerNote + (2 + Math.floor(Math.random()*3));
+  this.lastNote;
+  // movement logic
+  this.playing = false;
   this.meter = null;
   this.toFlip = false;
-  this.sendNote = sendNote;
-  this.songIndex = 0;
+  this.leftHand = null;
+  this.rightHand = null;
   this.rotationCount = 0;
   this.states = {
     1: {
@@ -48,6 +59,7 @@ var Player = function (id, options, sendNote) {
       orientation: CURSOR_LEFT
     }
   }
+
   // create player span
   $('.players').append(
     '<div class="player" id="'+this.id+'"><span><div class="cursor-wrapper"><div class="cursor"></div><div class="cursor-right"></div></div></span></div>'
@@ -64,17 +76,27 @@ var Player = function (id, options, sendNote) {
   this.cursorRight.css('background-color', options.color);
   this.cursorLeft.css('background-color', options.color);
 }
+
 Player.prototype.start = function() {
   var self = this;
   function nextNote() {
-    // get actual note mappings
-    var current = self.song[self.songIndex];
+    var current, next, next_2;
+    if (self.mode === MODES.player) {
+      console.log('self.newNote',self.newNote);
+      if (self.newNote && self.nextNote) {
 
-    // TODO subtract one from each note in TEST_SONG and don't hardcode the octave shift
+      }
+    } else if (self.mode === MODES.song) {
+      current = self.song[self.songIndex];
+      next = self.song[(self.songIndex + 1) % self.song.length];
+      next_2 = self.song[(self.songIndex + 2) % self.song.length];
+    }
+
+      // get actual note mappings
+    console.log('current',current);
+    console.log('next',next);
     var midiNote = (current < 7 ? 0 : (current > 13 ? 24 : 12)) + self.baseNote + MINOR_SCALE[(current) % 7];
 
-    var next = self.song[(self.songIndex + 1) % self.song.length];
-    var next_2 = self.song[(self.songIndex + 2) % self.song.length];
 
     // if neither hand is setup
     // initial setup
@@ -100,30 +122,31 @@ Player.prototype.start = function() {
       self.toFlip = false;
     }
 
-    if (current < next) {
-      if (next <= next_2) {
+    if (self.mode === MODES.song) {
+      if (current < next && next <= next_2) {
+          self.toFlip = true;
+      } else if (current > next && next >= next_2) {
         self.toFlip = true;
       }
+    }
+
+    if (current < next) {
       self.leftHand = notes[current];
       self.rightHand = notes[next];
     } else if (current > next) {
-      if (next >= next_2) {
-        self.toFlip = true;
-      }
       self.leftHand = notes[next];
       self.rightHand = notes[current];
     }
 
     // play and animate note
     self.sendNote(midiNote);
-    animateNote(midiNote);
+    animateNote(current);
 
     // render cursor
     self.render();
 
     // recursive call at SONG_RATE
     self.meter = setTimeout(nextNote, self.songRate);
-
     self.songIndex++;
     if (self.songIndex === self.song.length) self.songIndex = 0;
   }
@@ -157,6 +180,13 @@ Player.prototype.render = function() {
 Player.prototype.stop = function() {
   clearTimeout(this.meter);
   this.playing = false;
+}
+Player.prototype.setNote = function(note) {
+  this.newNote = note;
+}
+
+function setPlayerNote(player, note) {
+  player.setNote(note);
 }
 
 // var Conductor = function() {
@@ -193,7 +223,7 @@ function renderNotes() {
         notesHTML+=(
           '<div ' +
             'class="note" '+
-            'id="' + note.midi + '" ' +
+            'id="' + iter + '" ' +
             'style="' +
               'left:' + note.left + 'px;' +
               'top:' + note.top + 'px;' +
@@ -212,7 +242,6 @@ function initializeSettings() {
   $('.note').css('top', CANVAS_TOP);
 }
 
-
 function animateNote(note) {
   // note transition
   var activeNote = $('#'+note);
@@ -226,7 +255,7 @@ $(document).ready(function() {
   /*
       SOCKET OPERATIONS
    */
-  var socket = new WebSocket('ws://0.0.0.0:8081/');
+  var socket = new WebSocket('ws://0.0.0.0:8082/');
 
   socket.onmessage = function(evt) {
       var result = JSON.parse(evt.data);
@@ -241,6 +270,7 @@ $(document).ready(function() {
    */
   createNotes(DEFAULT_BASE_NOTE, renderNotes);
   initializeSettings();
+
 
   /**
    * create Player class with
@@ -274,19 +304,6 @@ $(document).ready(function() {
   });
 
 
-  // $('#start').on('click', function() {
-  //   bach.start();
-  //   mozart.start();
-  //   setTimeout(function() {dvorak.start()}, 1200);
-
-  // });
-
-  // $('#stop').on('click', function() {
-  //   mozart.stop();
-  //   bach.stop();
-  //   dvorak.stop();
-  // });
-
   var circles = false;
   $('#circles').hover(function() {
     $('.player span').css('background-color', (circles ? 'rgba(0,0,0,0)' : '#57AA83'));
@@ -296,13 +313,26 @@ $(document).ready(function() {
   /*
     USER INPUT
    */
+
+  var brahms = new Player('brahms', {mode: MODES.player, songRate: 600, color:'#6D1BBD'}, sendNote);
+  $('#start-player').hover(function() {
+    brahms.start();
+  });
+
+  $('#stop-player').hover(function() {
+    brahms.stop();
+  });
+
   $('.note').on('click', function(evt) {
-      var note = $(this).attr("id")
-      sendNote(note);
+      var note = $(this).attr("id");
+      sendNote(notes[note].midi);
+      setPlayerNote(brahms, note);
+
   });
 
   $('.note').on('mouseenter', function(evt) {
       var note = $(this).attr("id")
-      sendNote(note);
+      sendNote(notes[note].midi);
+      setPlayerNote(brahms, note);
   });
 });

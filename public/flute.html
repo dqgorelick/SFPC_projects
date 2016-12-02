@@ -46,7 +46,7 @@
         width: 100%;
         height: 100%;
         position: absolute;
-        /*z-index: 99;*/
+        z-index: 99;
       }
       .note{
         /*border: 1px black solid;*/
@@ -68,7 +68,7 @@
         position: absolute;
       }
       .player span {
-        /*z-index: 9;*/
+        z-index: 9;
         position: absolute;
         /*border: 10px rgba(0,0,0,1) solid;*/
         opacity: 0.8;
@@ -105,6 +105,11 @@
 
 <body>
     <div class="buttons">
+        <div>
+          <p>player</p>
+          <div class="button" id="start-player">start</div>
+          <div class="button" id="stop-player">stop</div>
+        </div>
         <div>
           <p>mozart</p>
           <div class="button" id="start-mozart">start</div>
