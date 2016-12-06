@@ -34,7 +34,6 @@ var Player = function (id, options, sendNote) {
   this.baseNote = options.baseNote || DEFAULT_BASE_NOTE;
   this.songRate = options.songRate || DEFAULT_SONG_RATE;
   this.mode = options.mode || MODES.song;
-  console.log('this.mode',this.mode);
   // socket callback
   this.sendNote = sendNote;
   // song mode
@@ -84,7 +83,6 @@ Player.prototype.start = function() {
   function nextNote() {
     var current, next, next_2;
     // if (self.mode === MODES.player) {
-    //   console.log('self.newNote',self.newNote);
     //   if (self.newNote && self.nextNote) {
 
     //   }
@@ -95,8 +93,6 @@ Player.prototype.start = function() {
     // }
 
       // get actual note mappings
-    console.log('current',current);
-    console.log('next',next);
     var midiNote = (current < 7 ? 0 : (current > 13 ? 24 : 12)) + self.baseNote + MINOR_SCALE[(current) % 7];
 
 
@@ -186,6 +182,10 @@ Player.prototype.stop = function() {
 Player.prototype.setNote = function(note) {
   this.newNote = note;
 }
+Player.prototype.remove = function(note) {
+  // this.stop();
+  $('#' + this.id).remove();
+}
 
 function setPlayerNote(player, note) {
   player.setNote(note);
@@ -254,15 +254,50 @@ function animateNote(note) {
 }
 
 $(document).ready(function() {
-  // view web socket
-  var wss_view = new WebSocket('ws://0.0.0.0:8082/');
-  wss_view.onmessage = function(evt) {
-      var result = JSON.parse(evt.data);
-  };
-  function sendNote (note) {
-    wss_view.send(note);
-  }
+  var players = {};
 
+  // view web socket
+  var socket = new WebSocket('ws://0.0.0.0:8082/');
+  socket.onmessage = function(evt) {
+      var message = JSON.parse(evt.data);
+      if(message.type === 'notes') {
+        if(!players[message.id]) {
+          // if player doesn't exist, create new player
+          players[message.id] = message
+          players[message.id].id = message.id
+          var notes = [];
+          message.notes.forEach(function(note, iter) {
+            if (iter === 0) {
+              players[message.id].dir = note.dir
+            }
+            notes.push(note.midi)
+          })
+          players[message.id].notes = notes
+          players[message.id].player = new Player(players[message.id].id, {songRate: 300, song:players[message.id].notes, color:'#7A3126'}, sendNote);
+        } else {
+          // player exists already
+          var notes = [];
+          message.notes.forEach(function(note, iter) {
+            if (iter === 0) {
+              players[message.id].dir = note.dir
+            }
+            notes.push(note.midi)
+          })
+          players[message.id].player.song = notes;
+        }
+      } else if(message.type === 'close') {
+        // remove player if they exist
+        if(players[message.id]) {
+          players[message.id].player.stop();
+          players[message.id].player.remove();
+          players[message.id] = null;
+        }
+      }
+  };
+
+  function sendNote (note) {
+    socket.send(note);
+  }
 
 
   /*
@@ -284,6 +319,7 @@ $(document).ready(function() {
   $('#stop-bach').hover(function() {
     bach.stop();
   });
+
 
   var mozart = new Player('mozart', {songRate: 300, song:CLIMBING_SONG_1, color:'#7A3126'}, sendNote);
 
