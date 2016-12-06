@@ -29,7 +29,6 @@ var wss_view = new(ws.Server)({
 wss_view.on('connection', function(ws) {
   console.log('A Web Socket connection has been established!')
   ws.on('message', function(event) {
-    console.log('event', event)
     udpPort.send({
       address: '/test',
       args: event
@@ -65,13 +64,15 @@ wss.on('connection', (ws) => {
 
   ws.on('message', (evt) => {
     var message = JSON.parse(evt)
-    console.log('message',message);
-    // console.log('message', message)
     if (message.type === 'notes') {
       players[id_player].notes = message.data
-      wss_view.broadcast(JSON.stringify({type: 'notes', id: id_player, notes: message.data, color: message.color}));
+      wss_view.broadcast(JSON.stringify({type: 'notes', id: id_player, tempo: message.tempo, notes: message.data, color: message.color}));
     } else if (message.type === 'tempo') {
-      console.log('message',message);
+      wss_view.broadcast(JSON.stringify({type: 'tempo', id: id_player, tempo: message.tempo}));
+    } else if (message.type === 'start') {
+      wss_view.broadcast(JSON.stringify({type: 'start', id: id_player}));
+    } else if (message.type === 'stop') {
+      wss_view.broadcast(JSON.stringify({type: 'stop', id: id_player}));
     }
   })
 

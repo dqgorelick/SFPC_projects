@@ -4,20 +4,57 @@
     <title>Inventions</title>
     <meta charset="utf-8">
     <meta content="text/html">
-    <title>Daniel Gorelick</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     <script src='./javascripts/vendor/colors.js'></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
       html, body{
         margin: 0;
         padding: 0;
+        font-family: sans-serif;
+        color: #ffffff;
+      }
+      .wrapper {
+        width: 100%;
+        height: calc(100vh - 80px);
+        position:relative;
       }
       .dev {
         position: absolute;
         top: 0;
         left:0;
       }
+      .tempo {
+        margin: 0 auto;
+        max-width: 50%;
+        z-index: 99;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        padding: 10px;
+      }
+      .tempo ul {
+        margin: 0;
+        padding: 0;
+      }
+      .tempo ul li {
+        display: inline-block;
+        margin-left: 10px;
+        line-height: 30px;
+        text-align: center;
+        opacity: 0.5;
+        -webkit-transition: all 100ms linear;
+        transition: all 100ms linear;
+      }
+      .tempo ul li img{
+        width: 80px;
+        height: 80px;
+      }
+      .tempo ul .active {
+        opacity: 1;
+      }
+
     </style>
 </head>
 
@@ -27,6 +64,19 @@
         You really badly need to use a different browser.
       </canvas>
     </div>
+<!--     <div class="controls">
+      <ul>
+        <li id='play'><img src="images/play.png" alt="play-button"></li>
+        <li id='pause'><img src="images/pause.png" alt="pause-button"></li>
+      </ul>
+    </div> -->
+ <!--    <div class="tempo">
+      <ul>
+        <li id='0'><img src="images/eighth.png" alt="eight-note"></li>
+        <li id='1'><img src="images/quarter.png" alt="eight-note"></li>
+        <li id='2'><img src="images/half.png" alt="eight-note"></li>
+      </ul>
+    </div> -->
     <div class="dev">
       <button onclick="window.startup();">Ready</button>
       <script src='./javascripts/player.js'></script>

@@ -7,21 +7,20 @@ var DEFAULT_SONG_RATE = 450;
 
 var MODES = { player: 1, song: 2 };
 // var TEST_SONG = [7,11,9,11,7,11,9,11,7,12,10,12,7,12,10,12];
-var TEST_SONG = [7,11,9,11,7,12,10,12];
+var TEST_SONG = [7, 11, 9, 11, 7, 12, 10, 12];
 // var TEST_SONG_HARMONY = [0, 2, 4, 2, 0, 2, 4, 2, 0, 3, 5, 3, 0, 3, 5, 3];
 var TEST_SONG_HARMONY = [4, 0, 2, 0, 4, 0, 2, 0, 5, 3, 4, 3, 5, 3, 4, 3];
-var CLIMBING_SONG_1 = [0,2,1,3,2,4,3,5,4,6,5,7,6,8,7,9,8,10,9,11,10,12,11,13,12,14];
+var CLIMBING_SONG_1 = [0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7, 9, 8, 10, 9, 11, 10, 12, 11, 13, 12, 14];
 // var CLIMBING_SONG_2 = [1,3,2,4,3,5,4,6,5,7,6,8,7,9,8,10,9,11,10,12,11,13,12,14,13,15];
-var CLIMBING_SONG_2 = [0,2,4,6,7,9,11,13,14];
+var CLIMBING_SONG_2 = [0, 2, 4, 6, 7, 9, 11, 13, 14];
 
 var MAJOR_SCALE = [0, 2, 4, 5, 7, 9, 11];
 var MINOR_SCALE = [0, 2, 3, 5, 7, 8, 10];
 
 var TEMPOS = {
-  0: 150,
-  1: 300,
-  2: 600,
-  3: 1200
+  0: 250,
+  1: 500,
+  2: 1000
 }
 
 var CANVAS_TOP = null; // get this from the css file from .note
@@ -35,7 +34,7 @@ var NOTE_DURATION = 200; // 0.2 second delay set in SuperCollider
 
 var notes = [];
 
-var Player = function (id, options, sendNote) {
+var Player = function(id, options, sendNote) {
   // parameters
   this.id = id;
   this.baseNote = options.baseNote || DEFAULT_BASE_NOTE;
@@ -68,10 +67,9 @@ var Player = function (id, options, sendNote) {
 
   // create player span
   $('.players').append(
-    '<div class="player" id="'+this.id+'"><span><div class="cursor-wrapper"><div class="cursor"></div><div class="cursor-right"></div></div></span></div>'
+    '<div class="player" id="' + this.id + '"><span><div class="cursor-wrapper"><div class="cursor"></div><div class="cursor-right"></div></div></span></div>'
   );
-  this.jQuery = $('#'+this.id+' span');
-  // $('#'+this.id + '.player span').css('background-color', options.color.hex);
+  this.jQuery = $('#' + this.id + ' span');
   this.cursorRight = this.jQuery.find('.cursor-right');
   this.cursorLeft = this.jQuery.find('.cursor');
 
@@ -84,32 +82,33 @@ var Player = function (id, options, sendNote) {
   this.cursorLeft.css('background-color', options.color.hex);
 }
 Player.prototype.tempo = function(tempo) {
-  this.songRate = TEMPO[tempo];
+  this.songRate = TEMPOS[tempo];
   this.jQuery.css('-webkit-transition', '-webkit-transform ' + this.songRate + 'ms linear');
   this.jQuery.css('transition', 'transform ' + this.songRate + 'ms linear');
 }
 Player.prototype.start = function() {
   var self = this;
+
   function nextNote() {
     var current, next, next_2;
     current = self.song[self.songIndex];
     next = self.song[(self.songIndex + 1) % self.song.length];
     next_2 = self.song[(self.songIndex + 2) % self.song.length];
 
-      // get actual note mappings
+    // get actual note mappings
     var midiNote = (current < 7 ? 0 : (current > 13 ? 24 : 12)) + self.baseNote + MINOR_SCALE[(current) % 7];
 
     // if neither hand is setup
     // initial setup
 
     if (!self.leftHand && !self.rightHand) {
-      if (current < next) {
+      if (current <= next) {
         self.state = 1;
       } else if (current > next) {
         self.state = 2;
       }
     } else {
-      switch(self.state) {
+      switch (self.state) {
         case 1:
           self.state = (self.toFlip ? 2 : 1);
           break;
@@ -125,7 +124,7 @@ Player.prototype.start = function() {
 
     if (self.mode === MODES.song) {
       if (current < next && next <= next_2) {
-          self.toFlip = true;
+        self.toFlip = true;
       } else if (current > next && next >= next_2) {
         self.toFlip = true;
       }
@@ -161,25 +160,23 @@ Player.prototype.start = function() {
   }
 }
 Player.prototype.render = function() {
-  console.log('this.state',this.state);
-  console.log('this.rotationCount',this.rotationCount);
   if (!this.rightHand && !this.leftHand) {
     return;
   }
   var params = this.states[this.state];
   this.rotationCount += params.rotation;
-  this.jQuery.css('-webkit-transform', 'rotate(' + (this.rotationCount)*180 + 'deg)');
-  this.jQuery.css('transform:','rotate(' + (this.rotationCount)*180 + 'deg)');
+  this.jQuery.css('-webkit-transform', 'rotate(' + (this.rotationCount) * 180 + 'deg)');
+  this.jQuery.css('transform:', 'rotate(' + (this.rotationCount) * 180 + 'deg)');
 
   if (params.orientation === CURSOR_LEFT) {
-    this.cursorRight.css('display','initial')
-    this.cursorLeft.css('display','none')
+    this.cursorRight.css('display', 'initial')
+    this.cursorLeft.css('display', 'none')
   } else {
-    this.cursorRight.css('display','none')
-    this.cursorLeft.css('display','initial')
+    this.cursorRight.css('display', 'none')
+    this.cursorLeft.css('display', 'initial')
   }
   var diameter = this.rightHand.center - this.leftHand.center;
-  var top = CANVAS_TOP + this.leftHand.width/4 - diameter/2;
+  var top = CANVAS_TOP + this.leftHand.width / 4 - diameter / 2;
   var left = this.leftHand.center;
   this.jQuery.css('top', top);
   this.jQuery.css('left', left);
@@ -199,7 +196,7 @@ Player.prototype.reset = function() {
   this.songIndex = 0;
   this.meter = null;
   this.toFlip = false;
-  this.rotationCount = 0;
+  this.rotationCount = this.rotationCount + (this.rotationCount % 2 ? 1 : 0);
 }
 
 // create the note objects
@@ -210,11 +207,11 @@ function createNotes(baseNote, cb) {
     notes[i] = {
       id: i,
       midi: DEFAULT_BASE_NOTE + (i < 7 ? 0 : (i > 13 ? 24 : 12)) + MINOR_SCALE[(i % MINOR_SCALE.length)],
-      left: noteWidth*i,
+      left: noteWidth * i,
       width: noteWidth,
       height: noteWidth / 2,
-      top: noteWidth/4,
-      center: noteWidth*i + noteWidth/2
+      top: noteWidth / 4,
+      center: noteWidth * i + noteWidth / 2
     }
   }
   cb();
@@ -225,17 +222,17 @@ function renderNotes() {
     (function() {
       var notesHTML = '';
       notes.forEach(function(note, iter) {
-        notesHTML+=(
+        notesHTML += (
           '<div ' +
-            'class="note" '+
-            'id="' + iter + '" ' +
-            'style="' +
-              'left:' + note.left + 'px;' +
-              'top:' + note.top + 'px;' +
-              'width:' + note.width + 'px;' +
-              'height:' + note.height + 'px;' +
-              'background-color:#' + parseInt((230*(iter/STEPS) + 16)).toString(16) + 'AAAA;' +
-            '" ' +
+          'class="note" ' +
+          'id="' + iter + '" ' +
+          'style="' +
+          'left:' + note.left + 'px;' +
+          'top:' + note.top + 'px;' +
+          'width:' + note.width + 'px;' +
+          'height:' + note.height + 'px;' +
+          'background-color:#' + parseInt((230 * (iter / STEPS) + 16)).toString(16) + 'AAAA;' +
+          '" ' +
           '></div>'
         );
       });
@@ -249,7 +246,7 @@ function initializeSettings() {
 
 function animateNote(note) {
   // note transition
-  var activeNote = $('#'+note);
+  var activeNote = $('#' + note);
   activeNote.addClass('active');
   setTimeout(function() {
     activeNote.removeClass('active');
@@ -264,47 +261,55 @@ $(document).ready(function() {
   // view web socket
   var socket = new WebSocket('ws://0.0.0.0:8082/');
   socket.onmessage = function(evt) {
-      var message = JSON.parse(evt.data);
-      if(message.type === 'notes') {
-        if(!players[message.id]) {
-          // if player doesn't exist, create new player
-          players[message.id] = message
-          players[message.id].id = message.id
-          var notes = [];
-          message.notes.forEach(function(note, iter) {
-            if (iter === 0) {
-              players[message.id].dir = note.dir
-            }
-            notes.push(note.midi)
-          })
-          players[message.id].notes = notes
-          console.log('message.color',message.color);
-          players[message.id].player = new Player(players[message.id].id, {songRate: 300, song:players[message.id].notes, color:message.color}, sendNote);
-        } else {
-          // player exists already
-          var notes = [];
-          message.notes.forEach(function(note, iter) {
-            if (iter === 0) {
-              players[message.id].dir = note.dir
-            }
-            notes.push(note.midi)
-          })
-          players[message.id].player.stop();
-          players[message.id].player.reset();
-          players[message.id].player.song = notes;
-          players[message.id].player.start();
-        }
-      } else if(message.type === 'close') {
-        // remove player if they exist
-        if(players[message.id]) {
-          players[message.id].player.stop();
-          players[message.id].player.remove();
-          players[message.id] = null;
-        }
+    var message = JSON.parse(evt.data);
+    if (message.type === 'notes') {
+      if (!players[message.id]) {
+        // if player doesn't exist, create new player
+        players[message.id] = message
+        players[message.id].id = message.id
+        var notes = [];
+        message.notes.forEach(function(note, iter) {
+          if (iter === 0) {
+            players[message.id].dir = note.dir
+          }
+          notes.push(note.midi)
+        })
+        players[message.id].notes = notes
+        console.log('TEMPOS[message.tempo]',TEMPOS[message.tempo]);
+        console.log('message',message);
+        players[message.id].player = new Player(players[message.id].id, { songRate: TEMPOS[message.tempo], song: players[message.id].notes, color: message.color }, sendNote);
+      } else {
+        // player exists already
+        var notes = [];
+        message.notes.forEach(function(note, iter) {
+          if (iter === 0) {
+            players[message.id].dir = note.dir
+          }
+          notes.push(note.midi)
+        })
+        players[message.id].player.stop();
+        players[message.id].player.reset();
+        players[message.id].player.song = notes;
+        players[message.id].player.start();
       }
+    } else if (message.type === 'tempo') {
+      console.log('message',message);
+      players[message.id].player.tempo(message.tempo);
+    } else if (message.type === 'start') {
+      players[message.id].player.start();
+    } else if (message.type === 'stop') {
+      players[message.id].player.stop();
+    } else if (message.type === 'close') {
+      // remove player if they exist
+      if (players[message.id]) {
+        players[message.id].player.stop();
+        players[message.id].player.remove();
+        players[message.id] = null;
+      }
+    }
   };
 
-  function sendNote (note) {
+  function sendNote(note) {
     socket.send(note);
   }
 
@@ -320,13 +325,13 @@ $(document).ready(function() {
    */
 
   $('.note').on('click', function(evt) {
-      var note = $(this).attr("id");
-      sendNote(notes[note].midi);
+    var note = $(this).attr("id");
+    sendNote(notes[note].midi);
   });
 
   $('.note').hover(function(evt) {
-      var note = $(this).attr("id");
-      sendNote(notes[note].midi);
+    var note = $(this).attr("id");
+    sendNote(notes[note].midi);
   });
 
 });

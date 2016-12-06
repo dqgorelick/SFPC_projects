@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function() {
+$(document).ready(function() {
   /*
       SOCKETS
    */
@@ -7,12 +7,38 @@ document.addEventListener("DOMContentLoaded", function() {
   // sfpc
   var socket = new WebSocket("ws://192.168.1.237:8088/");
   socket.onmessage = function(evt) {
-    console.log('evt',evt);
   };
+
+  /*
+      TEMPO LOGIC
+   */
+  // auto assign quarter note or half note
+  var tempo = Math.floor(Math.random()*2) + 1;
+  $('.tempo ul #1').addClass('active');
+
+  $('.tempo ul li').on('touchstart', function(evt) {
+    $('.tempo ul li').removeClass('active');
+    $(this).addClass('active');
+    tempo = this.id;
+    socket.send(JSON.stringify({type: 'tempo', tempo: tempo}));
+  });
+
+  $('#play').on('touchstart', function(evt) {
+    $('#pause').removeClass('active');
+    $(this).addClass('active');
+    socket.send(JSON.stringify({type: 'stop'}));
+  });
+
+  $('#pause').on('touchstart', function(evt) {
+    $('#play').removeClass('active');
+    $(this).addClass('active');
+    socket.send(JSON.stringify({type: 'start'}));
+  });
 
   /*
       LINE LOGIC
    */
+
 
   function drawLine() {
     var el = document.getElementsByTagName("canvas")[0];
@@ -20,14 +46,19 @@ document.addEventListener("DOMContentLoaded", function() {
     ctx.canvas.width  = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
     ctx.beginPath();
+    ctx.rect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.fillStyle = "black";
+    ctx.fill();
+
+    ctx.beginPath();
     ctx.moveTo(0,ctx.canvas.height/2);
     ctx.lineWidth=5;
     ctx.lineTo(ctx.canvas.width,ctx.canvas.height/2);
+    ctx.strokeStyle="#FFFFFF";
     ctx.stroke();
     lineCenter = ctx.canvas.height/2;
   }
   drawLine();
-
 
   var color = goldenColors.getHsvGolden(0.5, 0.95);
   var lineColorRGB = {r: color.r, g: color.g, b: color.b};
@@ -49,7 +80,6 @@ document.addEventListener("DOMContentLoaded", function() {
     var el = document.getElementsByTagName("canvas")[0];
     var ctx = el.getContext("2d");
     var midi = Math.floor((x / ctx.canvas.width)*16);
-    console.log('midi',midi);
     crosses.push({x: x, direction: direction, midi: midi});
     drawDot(x);
   }
@@ -59,16 +89,13 @@ document.addEventListener("DOMContentLoaded", function() {
       lastTouch = touch;
     } else {
       if (touch.clientY >= lineCenter && lastTouch.clientY < lineCenter) {
-        console.log('moved DOWN!');
         addNode((touch.clientX + lastTouch.clientX) / 2, 'down');
       } else if (touch.clientY <= lineCenter && lastTouch.clientY > lineCenter) {
-        console.log('moved UP!');
         addNode((touch.clientX + lastTouch.clientX) / 2, 'down');
       }
       lastTouch = touch;
     }
   }
-
 
   function colorToHex(r, g, b) {
     r = r.toString(16);
@@ -79,13 +106,11 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function finishTouch() {
-    console.log('crosses',crosses);
     var toSend = [];
     crosses.forEach(function(cross, iter) {
       toSend.push({midi: cross.midi, dir: cross.direction});
     });
-    console.log('lineColor',lineColor);
-    socket.send(JSON.stringify({type: 'notes', data: toSend, color: {hex: lineColor, rgb: lineColorRGB}}));
+    socket.send(JSON.stringify({type: 'notes', tempo: tempo, data: toSend, color: {hex: lineColor, rgb: lineColorRGB}}));
     lastNote = null;
     crosses = [];
   }
@@ -102,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function() {
    */
   window.startup = function() {
     var el = document.body;
-    el.addEventListener("touchstart", handleStart, false);
+    el.addEventListener("touchstart", handleStart ,false);
     el.addEventListener("touchend", handleEnd, false);
     el.addEventListener("touchcancel", handleCancel, false);
     el.addEventListener("touchleave", handleEnd, false);
@@ -110,6 +135,7 @@ document.addEventListener("DOMContentLoaded", function() {
     log("initialized.");
   }
   var ongoingTouches = new Array;
+  var firstTouch = null;
 
   function handleStart(evt) {
     crosses = [];
@@ -122,18 +148,21 @@ document.addEventListener("DOMContentLoaded", function() {
     var touches = evt.changedTouches;
     var offset = findPos(el);
 
+    // ignore menus
+    // touches[i].clientX - offset.x > 0 && touches[i].clientX - offset.x < parseFloat(el.width) && touches[i].clientY - offset.y > 0 && touches[i].clientY - offset.y < parseFloat(el.height)
 
     for (var i = 0; i < touches.length; i++) {
       if (touches[i].clientX - offset.x > 0 && touches[i].clientX - offset.x < parseFloat(el.width) && touches[i].clientY - offset.y > 0 && touches[i].clientY - offset.y < parseFloat(el.height)) {
         evt.preventDefault();
-        log("touchstart:" + i + "...");
-        ongoingTouches.push(copyTouch(touches[i]));
+        if (!ongoingTouches.length) {
+          ongoingTouches.push(copyTouch(touches[i]));
+        }
         ctx.beginPath();
         ctx.arc(touches[i].clientX - offset.x, touches[i].clientY - offset.y, 4, 0, 2 * Math.PI, false); // a circle at the start
+        log("touchstart:" + i + "...");
         ctx.fillStyle = lineColor;
         ctx.fill();
         drawLine();
-        log("touchstart:" + i + ".");
       }
     }
   }
@@ -160,7 +189,7 @@ document.addEventListener("DOMContentLoaded", function() {
           ctx.moveTo(ongoingTouches[idx].clientX - offset.x, ongoingTouches[idx].clientY - offset.y);
           log("ctx.lineTo(" + touches[i].clientX + ", " + touches[i].clientY + ");");
           ctx.lineTo(touches[i].clientX - offset.x, touches[i].clientY - offset.y);
-          ctx.lineWidth = 4;
+          ctx.lineWidth = 8;
           ctx.strokeStyle = lineColor;
           ctx.stroke();
 
@@ -228,6 +257,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function log(msg) {
+    // console.log('msg',msg);
     // var p = document.getElementById('log');
     // p.innerHTML = msg + "\n" + p.innerHTML;
   }
