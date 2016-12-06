@@ -103,6 +103,7 @@ document.addEventListener("DOMContentLoaded", function() {
       toSend.push({midi: cross.midi, dir: cross.direction});
     });
     socket.send(JSON.stringify({type: 'notes', data: toSend}));
+    lastNote = null;
     crosses = [];
   }
   /*
@@ -129,6 +130,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function handleStart(evt) {
     crosses = [];
+    lastTouch = null;
     //  log("touchstart.");
     var el = document.getElementsByTagName("canvas")[0];
     var ctx = el.getContext("2d");

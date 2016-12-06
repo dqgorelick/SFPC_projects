@@ -39,17 +39,14 @@ var Player = function (id, options, sendNote) {
   // song mode
   this.song = options.song || TEST_SONG;
   this.songIndex = 0;
-  // player mode
-  this.lowerNote = Math.floor(Math.random()*10);
-  this.higherNote = this.lowerNote + (2 + Math.floor(Math.random()*3));
-  this.lastNote;
+
   // movement logic
   this.playing = false;
   this.meter = null;
+  this.rotationCount = 0;
   this.toFlip = false;
   this.leftHand = null;
   this.rightHand = null;
-  this.rotationCount = 0;
   this.states = {
     1: {
       rotation: CW,
@@ -155,6 +152,11 @@ Player.prototype.start = function() {
   }
 }
 Player.prototype.render = function() {
+  console.log('this.state',this.state);
+  console.log('this.rotationCount',this.rotationCount);
+  if (!this.rightHand && !this.leftHand) {
+    return;
+  }
   var params = this.states[this.state];
   this.rotationCount += params.rotation;
   this.jQuery.css('-webkit-transform', 'rotate(' + (this.rotationCount)*180 + 'deg)');
@@ -179,16 +181,16 @@ Player.prototype.stop = function() {
   clearTimeout(this.meter);
   this.playing = false;
 }
-Player.prototype.setNote = function(note) {
-  this.newNote = note;
-}
-Player.prototype.remove = function(note) {
-  // this.stop();
+Player.prototype.remove = function() {
   $('#' + this.id).remove();
 }
-
-function setPlayerNote(player, note) {
-  player.setNote(note);
+Player.prototype.reset = function() {
+  this.leftHand = null;
+  this.rightHand = null;
+  this.songIndex = 0;
+  this.meter = null;
+  this.toFlip = false;
+  this.rotationCount = 0;
 }
 
 // var Conductor = function() {
@@ -283,7 +285,10 @@ $(document).ready(function() {
             }
             notes.push(note.midi)
           })
+          players[message.id].player.stop();
+          players[message.id].player.reset();
           players[message.id].player.song = notes;
+          players[message.id].player.start();
         }
       } else if(message.type === 'close') {
         // remove player if they exist
@@ -339,6 +344,12 @@ $(document).ready(function() {
     dvorak.stop();
   });
 
+  $('#test').on('click', function(evt) {
+    dvorak.stop();
+    dvorak.reset();
+    dvorak.song = (dvorak.song === CLIMBING_SONG_2 ? CLIMBING_SONG_1 : CLIMBING_SONG_2);
+    dvorak.start();
+  })
 
   var circles = false;
   $('#circles').hover(function() {
@@ -362,13 +373,11 @@ $(document).ready(function() {
   $('.note').on('click', function(evt) {
       var note = $(this).attr("id");
       sendNote(notes[note].midi);
-      setPlayerNote(brahms, note);
-
   });
 
-  $('.note').on('mouseenter', function(evt) {
-      var note = $(this).attr("id")
+  $('.note').hover(function(evt) {
+      var note = $(this).attr("id");
       sendNote(notes[note].midi);
-      setPlayerNote(brahms, note);
   });
+
 });
