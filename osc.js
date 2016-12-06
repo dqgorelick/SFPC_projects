@@ -38,9 +38,7 @@ wss_view.on('connection', function(ws) {
 })
 
 wss_view.broadcast = (data) => {
-  console.log('data',data);
   wss_view.clients.forEach(function each(client) {
-    console.log('CLIENT');
     console.log('data',data);
     client.send(data)
   })
@@ -72,7 +70,8 @@ wss.on('connection', (ws) => {
     if (message.type === 'notes') {
       console.log('notes!')
       players[id_player].notes = message.data
-      wss_view.broadcast(JSON.stringify({type: 'notes', id: id_player, notes: message.data}));
+      console.log('message.color',message.color);
+      wss_view.broadcast(JSON.stringify({type: 'notes', id: id_player, notes: message.data, color: message.color}));
     }
   })
 

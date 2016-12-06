@@ -2,45 +2,13 @@ document.addEventListener("DOMContentLoaded", function() {
   /*
       SOCKETS
    */
-  var socket = new WebSocket("ws://192.168.0.4:8088/");
-
+  // home
+  // var socket = new WebSocket("ws://192.168.0.4:8088/");
+  // sfpc
+  var socket = new WebSocket("ws://192.168.1.237:8088/");
   socket.onmessage = function(evt) {
-    // console.log('evt.data',evt.data);
-    // var data = JSON.parse(evt.data);
-    // console.log('data', data);
     console.log('evt',evt);
   };
-
-  var player = {
-    mouseX: 0,
-    mouseY: 0,
-    lastMouseX: null,
-    lastMouseY: null
-  };
-
-
-  document.onmousemove = function(e) {
-    player.mouseX = e.pageX;
-    player.mouseY = e.pageY;
-  };
-
-  function playerStatus() {
-    if (player.mouseX !== player.lastMouseX || player.mouseY !== player.lastMouseY) {
-      // console.log('moved mouse', player.mouseX, player.mouseY);
-      var status = (JSON.stringify({
-        status: {
-          x: player.mouseX,
-          y: player.mouseY
-        }
-      }));
-      console.log('status', status);
-      socket.send(status);
-    } else {
-      console.log('didn’t move mouse');
-    }
-    player.lastMouseY = player.mouseY;
-    player.lastMouseX = player.mouseX;
-  }
 
   /*
       LINE LOGIC
@@ -53,12 +21,17 @@ document.addEventListener("DOMContentLoaded", function() {
     ctx.canvas.height = window.innerHeight;
     ctx.beginPath();
     ctx.moveTo(0,ctx.canvas.height/2);
+    ctx.lineWidth=5;
     ctx.lineTo(ctx.canvas.width,ctx.canvas.height/2);
     ctx.stroke();
     lineCenter = ctx.canvas.height/2;
   }
   drawLine();
 
+
+  var color = goldenColors.getHsvGolden(0.5, 0.95);
+  var lineColorRGB = {r: color.r, g: color.g, b: color.b};
+  var lineColor = colorToHex(color.r, color.g, color.b);
   var lineCenter = null;
   var lastTouch = null;
   var crosses = [];
@@ -96,13 +69,23 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
+
+  function colorToHex(r, g, b) {
+    r = r.toString(16);
+    g = g.toString(16);
+    b = b.toString(16);
+    var color = "#" + r + g + b;
+    return color;
+  }
+
   function finishTouch() {
     console.log('crosses',crosses);
     var toSend = [];
     crosses.forEach(function(cross, iter) {
       toSend.push({midi: cross.midi, dir: cross.direction});
     });
-    socket.send(JSON.stringify({type: 'notes', data: toSend}));
+    console.log('lineColor',lineColor);
+    socket.send(JSON.stringify({type: 'notes', data: toSend, color: {hex: lineColor, rgb: lineColorRGB}}));
     lastNote = null;
     crosses = [];
   }
@@ -145,10 +128,9 @@ document.addEventListener("DOMContentLoaded", function() {
         evt.preventDefault();
         log("touchstart:" + i + "...");
         ongoingTouches.push(copyTouch(touches[i]));
-        var color = colorForTouch(touches[i]);
         ctx.beginPath();
         ctx.arc(touches[i].clientX - offset.x, touches[i].clientY - offset.y, 4, 0, 2 * Math.PI, false); // a circle at the start
-        ctx.fillStyle = color;
+        ctx.fillStyle = lineColor;
         ctx.fill();
         drawLine();
         log("touchstart:" + i + ".");
@@ -166,7 +148,6 @@ document.addEventListener("DOMContentLoaded", function() {
     for (var i = 0; i < touches.length; i++) {
       if (touches[i].clientX - offset.x > 0 && touches[i].clientX - offset.x < parseFloat(el.width) && touches[i].clientY - offset.y > 0 && touches[i].clientY - offset.y < parseFloat(el.height)) {
         evt.preventDefault();
-        var color = colorForTouch(touches[i]);
         var idx = ongoingTouchIndexById(touches[i].identifier);
         if (idx >= 0) {
           /*
@@ -180,7 +161,7 @@ document.addEventListener("DOMContentLoaded", function() {
           log("ctx.lineTo(" + touches[i].clientX + ", " + touches[i].clientY + ");");
           ctx.lineTo(touches[i].clientX - offset.x, touches[i].clientY - offset.y);
           ctx.lineWidth = 4;
-          ctx.strokeStyle = color;
+          ctx.strokeStyle = lineColor;
           ctx.stroke();
 
           ongoingTouches.splice(idx, 1, copyTouch(touches[i])); // swap in the new touch record
@@ -203,13 +184,12 @@ document.addEventListener("DOMContentLoaded", function() {
     for (var i = 0; i < touches.length; i++) {
       if (touches[i].clientX - offset.x > 0 && touches[i].clientX - offset.x < parseFloat(el.width) && touches[i].clientY - offset.y > 0 && touches[i].clientY - offset.y < parseFloat(el.height)) {
         evt.preventDefault();
-        var color = colorForTouch(touches[i]);
         var idx = ongoingTouchIndexById(touches[i].identifier);
 
         if (idx >= 0) {
           finishTouch();
           ctx.lineWidth = 4;
-          ctx.fillStyle = color;
+          ctx.fillStyle = lineColor;
           ctx.beginPath();
           ctx.moveTo(ongoingTouches[idx].clientX - offset.x, ongoingTouches[idx].clientY - offset.y);
           ctx.lineTo(touches[i].clientX - offset.x, touches[i].clientY - offset.y);
@@ -230,18 +210,6 @@ document.addEventListener("DOMContentLoaded", function() {
     for (var i = 0; i < touches.length; i++) {
       ongoingTouches.splice(i, 1); // remove it; we're done
     }
-  }
-
-  function colorForTouch(touch) {
-    var r = touch.identifier % 16;
-    var g = Math.floor(touch.identifier / 3) % 16;
-    var b = Math.floor(touch.identifier / 7) % 16;
-    r = r.toString(16); // make it a hex digit
-    g = g.toString(16); // make it a hex digit
-    b = b.toString(16); // make it a hex digit
-    var color = "#" + r + g + b;
-    log("color for touch with identifier " + touch.identifier + " = " + color);
-    return color;
   }
 
   function copyTouch(touch) {

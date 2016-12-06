@@ -47,6 +47,7 @@ var Player = function (id, options, sendNote) {
   this.toFlip = false;
   this.leftHand = null;
   this.rightHand = null;
+  this.color = '#57AA83' || options.color;
   this.states = {
     1: {
       rotation: CW,
@@ -63,6 +64,7 @@ var Player = function (id, options, sendNote) {
     '<div class="player" id="'+this.id+'"><span><div class="cursor-wrapper"><div class="cursor"></div><div class="cursor-right"></div></div></span></div>'
   );
   this.jQuery = $('#'+this.id+' span');
+  // $('#'+this.id + '.player span').css('background-color', options.color.hex);
   this.cursorRight = this.jQuery.find('.cursor-right');
   this.cursorLeft = this.jQuery.find('.cursor');
 
@@ -71,8 +73,8 @@ var Player = function (id, options, sendNote) {
   // this.jQuery.css('transition', 'all ' + this.songRate + 'ms linear');
   this.jQuery.css('-webkit-transition', '-webkit-transform ' + this.songRate + 'ms linear');
   this.jQuery.css('transition', 'transform ' + this.songRate + 'ms linear');
-  this.cursorRight.css('background-color', options.color);
-  this.cursorLeft.css('background-color', options.color);
+  this.cursorRight.css('background-color', options.color.hex);
+  this.cursorLeft.css('background-color', options.color.hex);
 }
 
 Player.prototype.start = function() {
@@ -193,14 +195,6 @@ Player.prototype.reset = function() {
   this.rotationCount = 0;
 }
 
-// var Conductor = function() {
-//   this.baseTempo = 300;
-//   this.players = [];
-// }
-// Conductor.prototype.createPlayer() {
-
-// }
-
 // create the note objects
 function createNotes(baseNote, cb) {
   var maxWidth = window.innerWidth;
@@ -275,7 +269,8 @@ $(document).ready(function() {
             notes.push(note.midi)
           })
           players[message.id].notes = notes
-          players[message.id].player = new Player(players[message.id].id, {songRate: 300, song:players[message.id].notes, color:'#7A3126'}, sendNote);
+          console.log('message.color',message.color);
+          players[message.id].player = new Player(players[message.id].id, {songRate: 300, song:players[message.id].notes, color:message.color}, sendNote);
         } else {
           // player exists already
           var notes = [];
@@ -353,7 +348,11 @@ $(document).ready(function() {
 
   var circles = false;
   $('#circles').hover(function() {
-    $('.player span').css('background-color', (circles ? 'rgba(0,0,0,0)' : '#57AA83'));
+    if(circles) {
+      $('.player span').addClass('active');
+    } else {
+      $('.player span').removeClass('active');
+    }
     circles = !circles;
   });
 
