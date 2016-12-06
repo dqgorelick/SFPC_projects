@@ -17,7 +17,14 @@ var CLIMBING_SONG_2 = [0,2,4,6,7,9,11,13,14];
 var MAJOR_SCALE = [0, 2, 4, 5, 7, 9, 11];
 var MINOR_SCALE = [0, 2, 3, 5, 7, 8, 10];
 
-var CANVAS_TOP = 225; // get this from the css file from .note
+var TEMPOS = {
+  0: 150,
+  1: 300,
+  2: 600,
+  3: 1200
+}
+
+var CANVAS_TOP = null; // get this from the css file from .note
 var CURSOR_WIDTH = 26;
 var CW = 1;
 var CCW = -1;
@@ -76,24 +83,21 @@ var Player = function (id, options, sendNote) {
   this.cursorRight.css('background-color', options.color.hex);
   this.cursorLeft.css('background-color', options.color.hex);
 }
-
+Player.prototype.tempo = function(tempo) {
+  this.songRate = TEMPO[tempo];
+  this.jQuery.css('-webkit-transition', '-webkit-transform ' + this.songRate + 'ms linear');
+  this.jQuery.css('transition', 'transform ' + this.songRate + 'ms linear');
+}
 Player.prototype.start = function() {
   var self = this;
   function nextNote() {
     var current, next, next_2;
-    // if (self.mode === MODES.player) {
-    //   if (self.newNote && self.nextNote) {
-
-    //   }
-    // } else if (self.mode === MODES.song) {
     current = self.song[self.songIndex];
     next = self.song[(self.songIndex + 1) % self.song.length];
     next_2 = self.song[(self.songIndex + 2) % self.song.length];
-    // }
 
       // get actual note mappings
     var midiNote = (current < 7 ? 0 : (current > 13 ? 24 : 12)) + self.baseNote + MINOR_SCALE[(current) % 7];
-
 
     // if neither hand is setup
     // initial setup
@@ -133,6 +137,9 @@ Player.prototype.start = function() {
     } else if (current > next) {
       self.leftHand = notes[next];
       self.rightHand = notes[current];
+    } else if (current === next) {
+      self.rightHand = notes[current];
+      self.leftHand = notes[next];
     }
 
     // play and animate note
@@ -250,6 +257,8 @@ function animateNote(note) {
 }
 
 $(document).ready(function() {
+  CANVAS_TOP = window.innerHeight / 2;
+
   var players = {};
 
   // view web socket
@@ -306,68 +315,9 @@ $(document).ready(function() {
   createNotes(DEFAULT_BASE_NOTE, renderNotes);
   initializeSettings();
 
-
-  /**
-   * create Player class with
-   * (id, options = {baseNote, songRate, song}, sendNote);
-   */
-  var bach = new Player('bach', {songRate: 600, song:TEST_SONG, color:'#57AA83'}, sendNote);
-
-  $('#start-bach').hover(function() {
-    bach.start();
-  });
-  $('#stop-bach').hover(function() {
-    bach.stop();
-  });
-
-
-  var mozart = new Player('mozart', {songRate: 300, song:CLIMBING_SONG_1, color:'#7A3126'}, sendNote);
-
-  $('#start-mozart').hover(function() {
-    mozart.start();
-  });
-  $('#stop-mozart').hover(function() {
-    mozart.stop();
-  });
-
-  var dvorak = new Player('dvorak', {songRate: 300, song:CLIMBING_SONG_2, color:'#7A2675'}, sendNote);
-
-  $('#start-dvorak').hover(function() {
-    dvorak.start();
-  });
-  $('#stop-dvorak').hover(function() {
-    dvorak.stop();
-  });
-
-  $('#test').on('click', function(evt) {
-    dvorak.stop();
-    dvorak.reset();
-    dvorak.song = (dvorak.song === CLIMBING_SONG_2 ? CLIMBING_SONG_1 : CLIMBING_SONG_2);
-    dvorak.start();
-  })
-
-  var circles = false;
-  $('#circles').hover(function() {
-    if(circles) {
-      $('.player span').addClass('active');
-    } else {
-      $('.player span').removeClass('active');
-    }
-    circles = !circles;
-  });
-
   /*
     USER INPUT
    */
-
-  var brahms = new Player('brahms', {mode: MODES.player, songRate: 600, color:'#6D1BBD'}, sendNote);
-  $('#start-player').hover(function() {
-    brahms.start();
-  });
-
-  $('#stop-player').hover(function() {
-    brahms.stop();
-  });
 
   $('.note').on('click', function(evt) {
       var note = $(this).attr("id");

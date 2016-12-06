@@ -13,6 +13,7 @@
       body, html {
         margin: 0;
         font-family: sans-serif;
+        color: #fff;
       }
       .buttons {
         position: absolute;
@@ -41,12 +42,13 @@
         height: 100vh;
         position: relative;
         background-color: rgba(247, 245, 218, 0.69);
+        background-color: rgba(0,0,0,0.9);
       }
       #canvas {
         width: 100%;
         height: 100%;
         position: absolute;
-        z-index: 99;
+        /*z-index: 99;*/
       }
       .note{
         /*border: 1px black solid;*/
@@ -104,7 +106,7 @@
 </head>
 
 <body>
-    <div class="buttons">
+<!--     <div class="buttons">
         <div>
           <p>player</p>
           <div class="button" id="start-player">start</div>
@@ -133,7 +135,7 @@
           <p>TEST</p>
           <div class="button" id="test">test</div>
         </div>
-    </div>
+    </div> -->
     <div class="canvas-wrapper">
       <div id="canvas"></div>
       <div class="players"></div>

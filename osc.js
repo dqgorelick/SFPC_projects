@@ -57,7 +57,6 @@ wss.broadcast = (data) => {
 }
 
 wss.on('connection', (ws) => {
-  wss.broadcast('hello world')
   console.log('player socket connection')
   var id_player = uuid.v4()
   players[id_player] = { id: id_player }
@@ -66,12 +65,13 @@ wss.on('connection', (ws) => {
 
   ws.on('message', (evt) => {
     var message = JSON.parse(evt)
+    console.log('message',message);
     // console.log('message', message)
     if (message.type === 'notes') {
-      console.log('notes!')
       players[id_player].notes = message.data
-      console.log('message.color',message.color);
       wss_view.broadcast(JSON.stringify({type: 'notes', id: id_player, notes: message.data, color: message.color}));
+    } else if (message.type === 'tempo') {
+      console.log('message',message);
     }
   })
 
