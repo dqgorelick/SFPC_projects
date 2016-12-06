@@ -2,7 +2,7 @@ s.quit;
 s.boot;
 
 (
-SynthDef(\bpfsaw, {
+SynthDef(\bpfsaw2, {
 	arg atk=2, sus=0, rel=3, c1=1, c2=(-1),
 	freq=500, detune=0.2, pan=0, cfhzmin=0.1, cfhzmax=0.3,
 	cfmin=500, cfmax=2000, rqmin=0.1, rqmax=0.2,
@@ -45,7 +45,7 @@ n = 46;
 
 (
 a = Scale.mixolydian;
-n = 48;
+n = 38;
 )
 
 (
@@ -55,8 +55,8 @@ n = 50;
 
 (
 ~chords = Pbind(
-	\instrument, \bpfsaw,
-	\dur, Pwhite(4.5,7,inf),
+	\instrument, \bpfsaw2,
+	\dur, Pwhite(5.2,7,inf),
 	\degree, Pxrand([
 		[8, 12, 10],
 		[-10, -3, 8, 11, 12, 14],
@@ -65,15 +65,20 @@ n = 50;
 	], inf),
 	\scale, Pfunc({ a }, inf),
 	\root, Pfunc({ n - 60}, inf),
-	\detune, Pexprand(0.05,0.2,inf),
+	\detune, Pexprand(0.1,0.2,inf),
+	// \detune, 0.05,
 	\cfmin, 100,
-	\cfmax, 1500,
-	\rqmin, Pexprand(0.01,0.15,inf),
+	\cfmax, 400,
+	\rqmin, Pexprand(0.003,0.1,inf),
+    \rqmax, Pexprand(0.2,0.25,inf),
+	// \rqmin, Pexprand(0.01,0.15,inf),
+	// \rqmin, Pexprand(0.01,0.15,inf),
 	\atk, Pwhite(1.0,1.5,inf),
 	\rel, Pwhite(6.5,10.0,inf),
 	\ldb, 6,
 	\amp, 1,
 	\out, 0,
+	\pan, 0,
 	\prevFreq, Pfunc({|evt|
 		evt[\degree].postln;
 		~b.sendMsg("/notes", *evt[\degree]);

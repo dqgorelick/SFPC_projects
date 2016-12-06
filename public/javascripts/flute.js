@@ -1,5 +1,7 @@
 'use strict';
 
+var PORT_PLAYER = 8888;
+
 var DEFAULT_BASE_NOTE = 48;
 var DEFAULT_SONG_RATE = 450;
 
@@ -81,16 +83,16 @@ Player.prototype.start = function() {
   var self = this;
   function nextNote() {
     var current, next, next_2;
-    if (self.mode === MODES.player) {
-      console.log('self.newNote',self.newNote);
-      if (self.newNote && self.nextNote) {
+    // if (self.mode === MODES.player) {
+    //   console.log('self.newNote',self.newNote);
+    //   if (self.newNote && self.nextNote) {
 
-      }
-    } else if (self.mode === MODES.song) {
-      current = self.song[self.songIndex];
-      next = self.song[(self.songIndex + 1) % self.song.length];
-      next_2 = self.song[(self.songIndex + 2) % self.song.length];
-    }
+    //   }
+    // } else if (self.mode === MODES.song) {
+    current = self.song[self.songIndex];
+    next = self.song[(self.songIndex + 1) % self.song.length];
+    next_2 = self.song[(self.songIndex + 2) % self.song.length];
+    // }
 
       // get actual note mappings
     console.log('current',current);
@@ -252,18 +254,16 @@ function animateNote(note) {
 }
 
 $(document).ready(function() {
-  /*
-      SOCKET OPERATIONS
-   */
-  var socket = new WebSocket('ws://0.0.0.0:8082/');
-
-  socket.onmessage = function(evt) {
+  // view web socket
+  var wss_view = new WebSocket('ws://0.0.0.0:8082/');
+  wss_view.onmessage = function(evt) {
       var result = JSON.parse(evt.data);
   };
-
   function sendNote (note) {
-    socket.send(note);
+    wss_view.send(note);
   }
+
+
 
   /*
     INITIALIZE

@@ -24,6 +24,7 @@ SynthDef(\bpfsaw, {
 }).add;
 )
 
+
 ~b = NetAddr.new("127.0.0.1", 57121);
 (
 ~chords = Pbind(
@@ -37,12 +38,12 @@ SynthDef(\bpfsaw, {
 	],inf),
 	\detune, Pexprand(0.05,0.2,inf),
 	\cfmin, 100,
-	\cfmax, 1500,
+	\cfmax, 600,
 	\rqmin, Pexprand(0.01,0.15,inf),
 	\atk, Pwhite(1.0,1.5,inf),
 	\rel, Pwhite(6.5,10.0,inf),
 	\ldb, 6,
-	\amp, 1,
+	\amp, 1.2,
 	\out, 0,
 	\prevFreq, Pfunc({|evt|
 		evt[\midinote].postln;
@@ -50,6 +51,7 @@ SynthDef(\bpfsaw, {
 	})
 
 ).play;
+)
 )
 
 ~chords.stop;

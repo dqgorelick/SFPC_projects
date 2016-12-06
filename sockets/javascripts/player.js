@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", function() {
         lastMouseY: null
     };
 
-
     document.onmousemove = function(e){
         player.mouseX = e.pageX;
         player.mouseY = e.pageY;
