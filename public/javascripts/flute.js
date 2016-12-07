@@ -18,9 +18,9 @@ var MAJOR_SCALE = [0, 2, 4, 5, 7, 9, 11];
 var MINOR_SCALE = [0, 2, 3, 5, 7, 8, 10];
 
 var TEMPOS = {
-  0: 250,
-  1: 500,
-  2: 1000
+  0: 200,
+  1: 400,
+  2: 800
 }
 
 var CANVAS_TOP = null; // get this from the css file from .note
@@ -275,9 +275,10 @@ $(document).ready(function() {
           notes.push(note.midi)
         })
         players[message.id].notes = notes
-        console.log('TEMPOS[message.tempo]',TEMPOS[message.tempo]);
-        console.log('message',message);
         players[message.id].player = new Player(players[message.id].id, { songRate: TEMPOS[message.tempo], song: players[message.id].notes, color: message.color }, sendNote);
+        players[message.id].player.stop();
+        players[message.id].player.reset();
+        players[message.id].player.start();
       } else {
         // player exists already
         var notes = [];

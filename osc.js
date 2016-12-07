@@ -17,7 +17,6 @@ var PLAYER_PORT = 8088
 var appResources = __dirname + '/public'
 var server = app.listen(STATIC_PORT)
 
-
 /************************************
     VIEW SOCKET
 *************************************/

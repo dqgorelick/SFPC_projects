@@ -5,45 +5,53 @@ $(document).ready(function() {
   // home
   // var socket = new WebSocket("ws://192.168.0.4:8088/");
   // sfpc
-  var socket = new WebSocket("ws://192.168.1.237:8088/");
-  socket.onmessage = function(evt) {
-  };
+  // var socket = new WebSocket("ws://192.168.1.237:8088/");
+  // catberry
+  var socket = new WebSocket("ws://10.0.1.31:8088/");
+  socket.onmessage = function(evt) {};
 
+  socket.onclose = function(evt) {
+    $('.instructions').css('display', 'none');
+    $('.reconnect').css('display', 'initial');
+    setTimeout(function() { $('.modal-wrapper').css('opacity', '1');}, 250);
+    $('.modal-wrapper').css('display', 'initial')
+
+        console.log('couldnt connect');
+    // }
+  };
   /*
       TEMPO LOGIC
    */
   // auto assign quarter note or half note
-  var tempo = Math.floor(Math.random()*2) + 1;
-  $('.tempo ul #1').addClass('active');
+  var tempo = Math.floor(Math.random() * 3);
+  $('.tempo ul #' + tempo).addClass('active');
 
   $('.tempo ul li').on('touchstart', function(evt) {
     $('.tempo ul li').removeClass('active');
     $(this).addClass('active');
     tempo = this.id;
-    socket.send(JSON.stringify({type: 'tempo', tempo: tempo}));
+    socket.send(JSON.stringify({ type: 'tempo', tempo: tempo }));
   });
 
   $('#play').on('touchstart', function(evt) {
     $('#pause').removeClass('active');
     $(this).addClass('active');
-    socket.send(JSON.stringify({type: 'stop'}));
+    socket.send(JSON.stringify({ type: 'stop' }));
   });
 
   $('#pause').on('touchstart', function(evt) {
     $('#play').removeClass('active');
     $(this).addClass('active');
-    socket.send(JSON.stringify({type: 'start'}));
+    socket.send(JSON.stringify({ type: 'start' }));
   });
 
   /*
       LINE LOGIC
    */
-
-
   function drawLine() {
     var el = document.getElementsByTagName("canvas")[0];
     var ctx = el.getContext("2d");
-    ctx.canvas.width  = window.innerWidth;
+    ctx.canvas.width = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
     ctx.beginPath();
     ctx.rect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -51,18 +59,21 @@ $(document).ready(function() {
     ctx.fill();
 
     ctx.beginPath();
-    ctx.moveTo(0,ctx.canvas.height/2);
-    ctx.lineWidth=5;
-    ctx.lineTo(ctx.canvas.width,ctx.canvas.height/2);
-    ctx.strokeStyle="#FFFFFF";
+    ctx.moveTo(0, ctx.canvas.height / 2);
+    ctx.lineWidth = 5;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.lineTo(ctx.canvas.width, ctx.canvas.height / 2);
+    ctx.strokeStyle = "#FFFFFF";
     ctx.stroke();
-    lineCenter = ctx.canvas.height/2;
+    lineCenter = ctx.canvas.height / 2;
   }
   drawLine();
 
   var color = goldenColors.getHsvGolden(0.5, 0.95);
-  var lineColorRGB = {r: color.r, g: color.g, b: color.b};
+  var lineColorRGB = { r: color.r, g: color.g, b: color.b };
   var lineColor = colorToHex(color.r, color.g, color.b);
+  var complement = '#' + ('000000' + (('0xffffff' ^ ('0x' + lineColor.split('#')[1])).toString(16))).slice(-6);
   var lineCenter = null;
   var lastTouch = null;
   var crosses = [];
@@ -71,16 +82,20 @@ $(document).ready(function() {
     var el = document.getElementsByTagName("canvas")[0];
     var ctx = el.getContext("2d");
     ctx.beginPath();
-    ctx.rect(x - 5, ctx.canvas.height/2 - 5, 10, 10);
-    ctx.fillStyle = "red";
+    ctx.rect(x - 9, ctx.canvas.height / 2 - 9, 18, 18);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.rect(x - 5, ctx.canvas.height / 2 - 5, 10, 10);
+    ctx.fillStyle = complement;
     ctx.fill();
   }
 
   function addNode(x, direction) {
     var el = document.getElementsByTagName("canvas")[0];
     var ctx = el.getContext("2d");
-    var midi = Math.floor((x / ctx.canvas.width)*16);
-    crosses.push({x: x, direction: direction, midi: midi});
+    var midi = Math.floor((x / ctx.canvas.width) * 16);
+    crosses.push({ x: x, direction: direction, midi: midi });
     drawDot(x);
   }
 
@@ -108,9 +123,9 @@ $(document).ready(function() {
   function finishTouch() {
     var toSend = [];
     crosses.forEach(function(cross, iter) {
-      toSend.push({midi: cross.midi, dir: cross.direction});
+      toSend.push({ midi: cross.midi, dir: cross.direction });
     });
-    socket.send(JSON.stringify({type: 'notes', tempo: tempo, data: toSend, color: {hex: lineColor, rgb: lineColorRGB}}));
+    socket.send(JSON.stringify({ type: 'notes', tempo: tempo, data: toSend, color: { hex: lineColor, rgb: lineColorRGB } }));
     lastNote = null;
     crosses = [];
   }
@@ -126,8 +141,12 @@ $(document).ready(function() {
       TOUCH EVENTS
    */
   window.startup = function() {
+    // hide modal
+    $('.modal-wrapper').css('opacity', '0');
+    setTimeout(function() { $('.modal-wrapper').css('display', 'none') }, 250);
+
     var el = document.body;
-    el.addEventListener("touchstart", handleStart ,false);
+    el.addEventListener("touchstart", handleStart, false);
     el.addEventListener("touchend", handleEnd, false);
     el.addEventListener("touchcancel", handleCancel, false);
     el.addEventListener("touchleave", handleEnd, false);
@@ -140,17 +159,12 @@ $(document).ready(function() {
   function handleStart(evt) {
     crosses = [];
     lastTouch = null;
-    //  log("touchstart.");
     var el = document.getElementsByTagName("canvas")[0];
     var ctx = el.getContext("2d");
-    ctx.canvas.width  = window.innerWidth;
+    ctx.canvas.width = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
     var touches = evt.changedTouches;
     var offset = findPos(el);
-
-    // ignore menus
-    // touches[i].clientX - offset.x > 0 && touches[i].clientX - offset.x < parseFloat(el.width) && touches[i].clientY - offset.y > 0 && touches[i].clientY - offset.y < parseFloat(el.height)
-
     for (var i = 0; i < touches.length; i++) {
       if (touches[i].clientX - offset.x > 0 && touches[i].clientX - offset.x < parseFloat(el.width) && touches[i].clientY - offset.y > 0 && touches[i].clientY - offset.y < parseFloat(el.height)) {
         evt.preventDefault();
@@ -203,8 +217,6 @@ $(document).ready(function() {
   }
 
   function handleEnd(evt) {
-
-    //  log("touchend/touchleave.");
     var el = document.getElementsByTagName("canvas")[0];
     var ctx = el.getContext("2d");
     var touches = evt.changedTouches;
@@ -220,10 +232,11 @@ $(document).ready(function() {
           ctx.lineWidth = 4;
           ctx.fillStyle = lineColor;
           ctx.beginPath();
+          ctx.lineJoin = 'round';
+          ctx.lineCap = 'round';
           ctx.moveTo(ongoingTouches[idx].clientX - offset.x, ongoingTouches[idx].clientY - offset.y);
           ctx.lineTo(touches[i].clientX - offset.x, touches[i].clientY - offset.y);
-          ctx.fillRect(touches[i].clientX - 4 - offset.x, touches[i].clientY - 4 - offset.y, 8, 8); // and a square at the end
-          ongoingTouches.splice(i, 1); // remove it; we're done
+          ongoingTouches.splice(i, 1);
         } else {
           log("can't figure out which touch to end");
         }
@@ -237,7 +250,7 @@ $(document).ready(function() {
     var touches = evt.changedTouches;
 
     for (var i = 0; i < touches.length; i++) {
-      ongoingTouches.splice(i, 1); // remove it; we're done
+      ongoingTouches.splice(i, 1);
     }
   }
 
@@ -253,7 +266,7 @@ $(document).ready(function() {
         return i;
       }
     }
-    return -1; // not found
+    return -1;
   }
 
   function log(msg) {
