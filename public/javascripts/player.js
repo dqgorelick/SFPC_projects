@@ -75,6 +75,7 @@ $(document).ready(function() {
   var complement = '#' + ('000000' + (('0xffffff' ^ ('0x' + lineColor.split('#')[1])).toString(16))).slice(-6);
   var lineCenter = null;
   var lastTouch = null;
+  var lastPoint = null
   var finalTouches = [];
   var crosses = [];
 
@@ -127,15 +128,32 @@ $(document).ready(function() {
     var el = document.getElementsByTagName("canvas")[0];
     var ctx = el.getContext("2d");
     var offset = findPos(el);
-    console.log('finalTouches',finalTouches);
     for (var i = 0; i < finalTouches.length-1; i++) {
     // redraw lines in ~~~color~~~
       ctx.beginPath();
-      ctx.lineWidth = 8;
       ctx.strokeStyle = lineColor;
+      ctx.globalAlpha = 1;
       ctx.moveTo(finalTouches[i].x, finalTouches[i].y);
       ctx.lineTo(finalTouches[i+1].x, finalTouches[i+1].y);
       ctx.stroke();
+      ctx.moveTo(finalTouches[i].x - 4, finalTouches[i].y - 4);
+      ctx.lineTo(finalTouches[i+1].x - 4, finalTouches[i+1].y - 4);
+      ctx.stroke();
+      ctx.moveTo(finalTouches[i].x - 2, finalTouches[i].y - 2);
+      ctx.lineTo(finalTouches[i+1].x - 2, finalTouches[i+1].y - 2);
+      ctx.stroke();
+      ctx.moveTo(finalTouches[i].x + 2, finalTouches[i].y + 2);
+      ctx.lineTo(finalTouches[i+1].x + 2, finalTouches[i+1].y + 2);
+      ctx.stroke();
+      ctx.moveTo(finalTouches[i].x + 4, finalTouches[i].y + 4);
+      ctx.lineTo(finalTouches[i+1].x + 4, finalTouches[i+1].y + 4);
+      ctx.stroke();
+
+      // ctx.beginPath();
+      // ctx.lineWidth = 8;
+      // ctx.moveTo(finalTouches[i].x, finalTouches[i].y);
+      // ctx.lineTo(finalTouches[i+1].x, finalTouches[i+1].y);
+      // ctx.stroke();
     }
 
     var toSend = [];
@@ -187,6 +205,7 @@ $(document).ready(function() {
         if (!ongoingTouches.length) {
           ongoingTouches.push(copyTouch(touches[i]));
         }
+        lastPoint = {x:touches[i].clientX - offset.x, y: touches[i].clientY - offset.y};
         finalTouches.push({x:touches[i].clientX - offset.x, y: touches[i].clientY - offset.y});
         drawLine();
       }
@@ -210,12 +229,37 @@ $(document).ready(function() {
            */
           finalTouches.push({x:touches[i].clientX - offset.x, y: touches[i].clientY - offset.y});
           checkLine(ongoingTouches[idx]);
+          // ctx.beginPath();
+          // ctx.moveTo(ongoingTouches[idx].clientX - offset.x, ongoingTouches[idx].clientY - offset.y);
+          // ctx.lineTo(touches[i].clientX - offset.x, touches[i].clientY - offset.y);
+          // ctx.lineWidth = 4;
+          // ctx.strokeStyle = "#ffffff";
+          // ctx.stroke();
+          //
           ctx.beginPath();
-          ctx.moveTo(ongoingTouches[idx].clientX - offset.x, ongoingTouches[idx].clientY - offset.y);
-          ctx.lineTo(touches[i].clientX - offset.x, touches[i].clientY - offset.y);
-          ctx.lineWidth = 4;
-          ctx.strokeStyle = "#ffffff";
+
+          ctx.globalAlpha = 1;
+          ctx.moveTo(lastPoint.x, lastPoint.y);
+          ctx.lineTo(touches[i].clientX, touches[i].clientY);
           ctx.stroke();
+
+          ctx.moveTo(lastPoint.x - 4, lastPoint.y - 4);
+          ctx.lineTo(touches[i].clientX - 4, touches[i].clientY - 4);
+          ctx.stroke();
+
+          ctx.moveTo(lastPoint.x - 2, lastPoint.y - 2);
+          ctx.lineTo(touches[i].clientX - 2, touches[i].clientY - 2);
+          ctx.stroke();
+
+          ctx.moveTo(lastPoint.x + 2, lastPoint.y + 2);
+          ctx.lineTo(touches[i].clientX + 2, touches[i].clientY + 2);
+          ctx.stroke();
+
+          ctx.moveTo(lastPoint.x + 4, lastPoint.y + 4);
+          ctx.lineTo(touches[i].clientX + 4, touches[i].clientY + 4);
+          ctx.stroke();
+
+          lastPoint = { x: touches[i].clientX, y: touches[i].clientY };
 
           ongoingTouches.splice(idx, 1, copyTouch(touches[i])); // swap in the new touch record
         }

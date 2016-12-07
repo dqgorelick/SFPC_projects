@@ -141,10 +141,10 @@ Player.prototype.start = function() {
       self.leftHand = notes[next];
     }
 
-    if(self.song.length > 0) {
+    if (self.song.length > 0) {
       // play and animate note
       self.sendNote(midiNote);
-      animateNote(current, self.songRate/2);
+      animateNote(current, 150);
     }
 
     // render cursor
@@ -225,10 +225,13 @@ function createNotes(baseNote, cb) {
 }
 
 function renderNotes() {
+  var noteHeight;
   $('#canvas').html(
     (function() {
       var notesHTML = '';
       notes.forEach(function(note, iter) {
+        var color = parseInt((180 * (iter / STEPS) + 60)).toString(16);
+        noteHeight = note.height;
         notesHTML += (
           '<div ' +
           'class="note" ' +
@@ -238,13 +241,25 @@ function renderNotes() {
           'top:' + note.top + 'px;' +
           'width:' + note.width + 'px;' +
           'height:' + note.height + 'px;' +
-          'background-color:#' + parseInt((230 * (iter / STEPS) + 16)).toString(16) + '9999;' +
           '" ' +
           '></div>'
         );
       });
       return notesHTML;
-    })());
+    })()
+  );
+  $('.scale').html(
+    (function() {
+      return (
+        '<div class="scale-background"' +
+        'style="' +
+        'top:' + CANVAS_TOP + 'px;' +
+        'height:' + noteHeight + 'px;' +
+        '" ' +
+        '></div>'
+      )
+    })()
+  )
 }
 
 function initializeSettings() {

@@ -52,20 +52,17 @@
         /*z-index: 99;*/
       }
       .note{
-        /*border: 1px black solid;*/
-        /*border-radius: 100%;*/
         position: absolute;
         top: 150px;
-        -webkit-transition: opacity 25ms cubic-bezier(0.23, 1, 0.32, 1);
-        transition:         opacity 25ms cubic-bezier(0.23, 1, 0.32, 1);
-        opacity: 0.9;
+        background-color: rgba(0,0,0,1);
+        opacity: 0;
       }
       .note:hover {
-        opacity: 1;
         cursor: pointer;
+        opacity: 0.2;
       }
       .note.active {
-        opacity: 1;
+        opacity: 0.2;
       }
       .player {
         position: absolute;
@@ -73,7 +70,6 @@
       .player span {
         z-index: 9;
         position: absolute;
-        /*border: 10px rgba(0,0,0,1) solid;*/
         opacity: 0.95;
         border-radius: 100%;
       }
@@ -102,6 +98,16 @@
         top: calc(50% - 20px);
         right: -20px;
         background-color: rgba(0,0,0,1);
+      }
+
+      .scale-background {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        background: rgb(17,136,136);
+        background: -moz-linear-gradient(left, rgba(17,136,136,1) 0%, rgba(255,153,153,1) 100%);
+        background: -webkit-linear-gradient(left, rgba(17,136,136,1) 0%,rgba(255,153,153,1) 100%);
+        background: linear-gradient(to right, rgba(17,136,136,1) 0%,rgba(255,153,153,1) 100%);
       }
     </style>
 </head>
@@ -138,6 +144,7 @@
         </div>
     </div> -->
     <div class="canvas-wrapper">
+      <div class="scale"></div>
       <div id="canvas"></div>
       <div class="players"></div>
     </div>
