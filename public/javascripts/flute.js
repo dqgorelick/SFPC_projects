@@ -141,9 +141,11 @@ Player.prototype.start = function() {
       self.leftHand = notes[next];
     }
 
-    // play and animate note
-    self.sendNote(midiNote);
-    animateNote(current);
+    if(self.song.length > 0) {
+      // play and animate note
+      self.sendNote(midiNote);
+      animateNote(current, self.songRate/2);
+    }
 
     // render cursor
     self.render();
@@ -160,6 +162,11 @@ Player.prototype.start = function() {
   }
 }
 Player.prototype.render = function() {
+  if (this.song.length === 0) {
+    this.cursorRight.css('display', 'none');
+    this.cursorLeft.css('display', 'none');
+    return;
+  }
   if (!this.rightHand && !this.leftHand) {
     return;
   }
@@ -231,7 +238,7 @@ function renderNotes() {
           'top:' + note.top + 'px;' +
           'width:' + note.width + 'px;' +
           'height:' + note.height + 'px;' +
-          'background-color:#' + parseInt((230 * (iter / STEPS) + 16)).toString(16) + 'AAAA;' +
+          'background-color:#' + parseInt((230 * (iter / STEPS) + 16)).toString(16) + '9999;' +
           '" ' +
           '></div>'
         );
@@ -244,13 +251,13 @@ function initializeSettings() {
   $('.note').css('top', CANVAS_TOP);
 }
 
-function animateNote(note) {
+function animateNote(note, duration) {
   // note transition
   var activeNote = $('#' + note);
   activeNote.addClass('active');
   setTimeout(function() {
     activeNote.removeClass('active');
-  }, NOTE_DURATION);
+  }, duration);
 }
 
 $(document).ready(function() {
@@ -294,7 +301,6 @@ $(document).ready(function() {
         players[message.id].player.start();
       }
     } else if (message.type === 'tempo') {
-      console.log('message',message);
       players[message.id].player.tempo(message.tempo);
     } else if (message.type === 'start') {
       players[message.id].player.start();

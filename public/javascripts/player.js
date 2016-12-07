@@ -104,9 +104,11 @@ $(document).ready(function() {
       lastTouch = touch;
     } else {
       if (touch.clientY >= lineCenter && lastTouch.clientY < lineCenter) {
+        console.log('DOWN');
         addNode((touch.clientX + lastTouch.clientX) / 2, 'down');
       } else if (touch.clientY <= lineCenter && lastTouch.clientY > lineCenter) {
-        addNode((touch.clientX + lastTouch.clientX) / 2, 'down');
+        console.log('UP');
+        addNode((touch.clientX + lastTouch.clientX) / 2, 'up');
       }
       lastTouch = touch;
     }
@@ -121,9 +123,11 @@ $(document).ready(function() {
   }
 
   function finishTouch() {
+    drawLine();
     var el = document.getElementsByTagName("canvas")[0];
     var ctx = el.getContext("2d");
     var offset = findPos(el);
+    console.log('finalTouches',finalTouches);
     for (var i = 0; i < finalTouches.length-1; i++) {
     // redraw lines in ~~~color~~~
       ctx.beginPath();
@@ -232,9 +236,9 @@ $(document).ready(function() {
     var ctx = el.getContext("2d");
     var touches = evt.changedTouches;
     var offset = findPos(el);
-
+    // finishTouch();
     for (var i = 0; i < touches.length; i++) {
-      if (touches[i].clientX - offset.x > 0 && touches[i].clientX - offset.x < parseFloat(el.width) && touches[i].clientY - offset.y > 0 && touches[i].clientY - offset.y < parseFloat(el.height)) {
+      // if (touches[i].clientX - offset.x > 0 && touches[i].clientX - offset.x < parseFloat(el.width) && touches[i].clientY - offset.y > 0 && touches[i].clientY - offset.y < parseFloat(el.height)) {
         evt.preventDefault();
         var idx = ongoingTouchIndexById(touches[i].identifier);
         finalTouches.push({x:touches[i].clientX - offset.x, y: touches[i].clientY - offset.y});
@@ -251,11 +255,12 @@ $(document).ready(function() {
         } else {
           log("can't figure out which touch to end");
         }
-      }
+      // }
     }
   }
 
   function handleCancel(evt) {
+    finishTouch();
     evt.preventDefault();
     log("touchcancel.");
     var touches = evt.changedTouches;
