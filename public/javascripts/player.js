@@ -5,9 +5,9 @@ $(document).ready(function() {
   // home
   // var socket = new WebSocket("ws://192.168.0.4:8088/");
   // sfpc
-  // var socket = new WebSocket("ws://192.168.1.237:8088/");
+  var socket = new WebSocket("ws://192.168.1.237:8088/");
   // catberry
-  var socket = new WebSocket("ws://10.0.1.31:8088/");
+  // var socket = new WebSocket("ws://10.0.1.31:8088/");
   socket.onmessage = function(evt) {};
 
   socket.onclose = function(evt) {
@@ -16,7 +16,6 @@ $(document).ready(function() {
     setTimeout(function() { $('.modal-wrapper').css('opacity', '1');}, 250);
     $('.modal-wrapper').css('display', 'initial')
 
-        console.log('couldnt connect');
     // }
   };
   /*
@@ -76,6 +75,7 @@ $(document).ready(function() {
   var complement = '#' + ('000000' + (('0xffffff' ^ ('0x' + lineColor.split('#')[1])).toString(16))).slice(-6);
   var lineCenter = null;
   var lastTouch = null;
+  var finalTouches = [];
   var crosses = [];
 
   function drawDot(x) {
@@ -121,8 +121,23 @@ $(document).ready(function() {
   }
 
   function finishTouch() {
+    var el = document.getElementsByTagName("canvas")[0];
+    var ctx = el.getContext("2d");
+    var offset = findPos(el);
+    for (var i = 0; i < finalTouches.length-1; i++) {
+    // redraw lines in ~~~color~~~
+      ctx.beginPath();
+      ctx.lineWidth = 8;
+      ctx.strokeStyle = lineColor;
+      ctx.moveTo(finalTouches[i].x, finalTouches[i].y);
+      ctx.lineTo(finalTouches[i+1].x, finalTouches[i+1].y);
+      ctx.stroke();
+    }
+
     var toSend = [];
     crosses.forEach(function(cross, iter) {
+      // redraw dots
+      drawDot(cross.x);
       toSend.push({ midi: cross.midi, dir: cross.direction });
     });
     socket.send(JSON.stringify({ type: 'notes', tempo: tempo, data: toSend, color: { hex: lineColor, rgb: lineColorRGB } }));
@@ -159,10 +174,8 @@ $(document).ready(function() {
   function handleStart(evt) {
     crosses = [];
     lastTouch = null;
+    finalTouches = [];
     var el = document.getElementsByTagName("canvas")[0];
-    var ctx = el.getContext("2d");
-    ctx.canvas.width = window.innerWidth;
-    ctx.canvas.height = window.innerHeight;
     var touches = evt.changedTouches;
     var offset = findPos(el);
     for (var i = 0; i < touches.length; i++) {
@@ -171,22 +184,19 @@ $(document).ready(function() {
         if (!ongoingTouches.length) {
           ongoingTouches.push(copyTouch(touches[i]));
         }
-        ctx.beginPath();
-        ctx.arc(touches[i].clientX - offset.x, touches[i].clientY - offset.y, 4, 0, 2 * Math.PI, false); // a circle at the start
+        finalTouches.push({x:touches[i].clientX - offset.x, y: touches[i].clientY - offset.y});
         log("touchstart:" + i + "...");
-        ctx.fillStyle = lineColor;
-        ctx.fill();
         drawLine();
       }
     }
   }
 
   function handleMove(evt) {
-
     var el = document.getElementsByTagName("canvas")[0];
     var ctx = el.getContext("2d");
     var touches = evt.changedTouches;
     var offset = findPos(el);
+
 
     for (var i = 0; i < touches.length; i++) {
       if (touches[i].clientX - offset.x > 0 && touches[i].clientX - offset.x < parseFloat(el.width) && touches[i].clientY - offset.y > 0 && touches[i].clientY - offset.y < parseFloat(el.height)) {
@@ -196,6 +206,7 @@ $(document).ready(function() {
           /*
               CHECK LINE
            */
+          finalTouches.push({x:touches[i].clientX - offset.x, y: touches[i].clientY - offset.y});
           checkLine(ongoingTouches[idx]);
           log("continuing touch " + idx);
           ctx.beginPath();
@@ -203,8 +214,8 @@ $(document).ready(function() {
           ctx.moveTo(ongoingTouches[idx].clientX - offset.x, ongoingTouches[idx].clientY - offset.y);
           log("ctx.lineTo(" + touches[i].clientX + ", " + touches[i].clientY + ");");
           ctx.lineTo(touches[i].clientX - offset.x, touches[i].clientY - offset.y);
-          ctx.lineWidth = 8;
-          ctx.strokeStyle = lineColor;
+          ctx.lineWidth = 4;
+          ctx.strokeStyle = "#ffffff";
           ctx.stroke();
 
           ongoingTouches.splice(idx, 1, copyTouch(touches[i])); // swap in the new touch record
@@ -226,11 +237,11 @@ $(document).ready(function() {
       if (touches[i].clientX - offset.x > 0 && touches[i].clientX - offset.x < parseFloat(el.width) && touches[i].clientY - offset.y > 0 && touches[i].clientY - offset.y < parseFloat(el.height)) {
         evt.preventDefault();
         var idx = ongoingTouchIndexById(touches[i].identifier);
-
+        finalTouches.push({x:touches[i].clientX - offset.x, y: touches[i].clientY - offset.y});
         if (idx >= 0) {
           finishTouch();
           ctx.lineWidth = 4;
-          ctx.fillStyle = lineColor;
+          ctx.fillStyle = "#ffffff";
           ctx.beginPath();
           ctx.lineJoin = 'round';
           ctx.lineCap = 'round';
@@ -270,7 +281,6 @@ $(document).ready(function() {
   }
 
   function log(msg) {
-    // console.log('msg',msg);
     // var p = document.getElementById('log');
     // p.innerHTML = msg + "\n" + p.innerHTML;
   }

@@ -72,6 +72,8 @@ wss.on('connection', (ws) => {
       wss_view.broadcast(JSON.stringify({type: 'start', id: id_player}));
     } else if (message.type === 'stop') {
       wss_view.broadcast(JSON.stringify({type: 'stop', id: id_player}));
+    } else if (message.type === 'heartbeat') {
+      players[id_player].inactive = false;
     }
   })
 
@@ -82,6 +84,23 @@ wss.on('connection', (ws) => {
     console.log(`Number of players: ${_.size(players)}`)
   })
 })
+
+
+function heartbeat() {
+  wss.broadcast(JSON.stringify({type: 'heartbeat'}));
+  // check if player is active, set to be inactive
+  // if inactive, delete player
+  // // send message to view
+  // _.forOwn(players, function(key, value) {
+  //   console.log('key',key);
+  //   console.log('value',value);
+  //   players[key]
+  // })
+}
+
+setInterval(heartbeat, 3000);
+
+
 
 /************************************
     OSC SOCKET
