@@ -170,7 +170,6 @@ $(document).ready(function() {
     el.addEventListener("touchcancel", handleCancel, false);
     el.addEventListener("touchleave", handleEnd, false);
     el.addEventListener("touchmove", handleMove, false);
-    log("initialized.");
   }
   var ongoingTouches = new Array;
   var firstTouch = null;
@@ -189,7 +188,6 @@ $(document).ready(function() {
           ongoingTouches.push(copyTouch(touches[i]));
         }
         finalTouches.push({x:touches[i].clientX - offset.x, y: touches[i].clientY - offset.y});
-        log("touchstart:" + i + "...");
         drawLine();
       }
     }
@@ -212,20 +210,14 @@ $(document).ready(function() {
            */
           finalTouches.push({x:touches[i].clientX - offset.x, y: touches[i].clientY - offset.y});
           checkLine(ongoingTouches[idx]);
-          log("continuing touch " + idx);
           ctx.beginPath();
-          log("ctx.moveTo(" + ongoingTouches[idx].clientX + ", " + ongoingTouches[idx].clientY + ");");
           ctx.moveTo(ongoingTouches[idx].clientX - offset.x, ongoingTouches[idx].clientY - offset.y);
-          log("ctx.lineTo(" + touches[i].clientX + ", " + touches[i].clientY + ");");
           ctx.lineTo(touches[i].clientX - offset.x, touches[i].clientY - offset.y);
           ctx.lineWidth = 4;
           ctx.strokeStyle = "#ffffff";
           ctx.stroke();
 
           ongoingTouches.splice(idx, 1, copyTouch(touches[i])); // swap in the new touch record
-          log(".");
-        } else {
-          log("can't figure out which touch to continue");
         }
       }
     }
@@ -236,33 +228,27 @@ $(document).ready(function() {
     var ctx = el.getContext("2d");
     var touches = evt.changedTouches;
     var offset = findPos(el);
-    // finishTouch();
     for (var i = 0; i < touches.length; i++) {
-      // if (touches[i].clientX - offset.x > 0 && touches[i].clientX - offset.x < parseFloat(el.width) && touches[i].clientY - offset.y > 0 && touches[i].clientY - offset.y < parseFloat(el.height)) {
-        evt.preventDefault();
-        var idx = ongoingTouchIndexById(touches[i].identifier);
-        finalTouches.push({x:touches[i].clientX - offset.x, y: touches[i].clientY - offset.y});
-        if (idx >= 0) {
-          finishTouch();
-          ctx.lineWidth = 4;
-          ctx.fillStyle = "#ffffff";
-          ctx.beginPath();
-          ctx.lineJoin = 'round';
-          ctx.lineCap = 'round';
-          ctx.moveTo(ongoingTouches[idx].clientX - offset.x, ongoingTouches[idx].clientY - offset.y);
-          ctx.lineTo(touches[i].clientX - offset.x, touches[i].clientY - offset.y);
-          ongoingTouches.splice(i, 1);
-        } else {
-          log("can't figure out which touch to end");
-        }
-      // }
+      evt.preventDefault();
+      var idx = ongoingTouchIndexById(touches[i].identifier);
+      finalTouches.push({x:touches[i].clientX - offset.x, y: touches[i].clientY - offset.y});
+      if (idx >= 0) {
+        finishTouch();
+        ctx.lineWidth = 4;
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.moveTo(ongoingTouches[idx].clientX - offset.x, ongoingTouches[idx].clientY - offset.y);
+        ctx.lineTo(touches[i].clientX - offset.x, touches[i].clientY - offset.y);
+        ongoingTouches.splice(i, 1);
+      }
     }
   }
 
   function handleCancel(evt) {
     finishTouch();
     evt.preventDefault();
-    log("touchcancel.");
     var touches = evt.changedTouches;
 
     for (var i = 0; i < touches.length; i++) {
@@ -283,11 +269,6 @@ $(document).ready(function() {
       }
     }
     return -1;
-  }
-
-  function log(msg) {
-    // var p = document.getElementById('log');
-    // p.innerHTML = msg + "\n" + p.innerHTML;
   }
 
   function findPos(obj) {
