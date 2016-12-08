@@ -6,6 +6,7 @@ $(document).ready(function() {
   // var socket = new WebSocket("ws://192.168.0.4:8088/");
   // sfpc
   var socket = new WebSocket("ws://192.168.1.237:8088/");
+  // var socket = new WebSocket("ws://192.168.1.237:8088/");
   // catberry
   // var socket = new WebSocket("ws://10.0.1.31:8088/");
   socket.onmessage = function(evt) {};
@@ -67,11 +68,19 @@ $(document).ready(function() {
     ctx.stroke();
     lineCenter = ctx.canvas.height / 2;
   }
+
   drawLine();
 
   var color = goldenColors.getHsvGolden(0.5, 0.95);
   var lineColorRGB = { r: color.r, g: color.g, b: color.b };
   var lineColor = colorToHex(color.r, color.g, color.b);
+
+  if (window.innerHeight > window.innerWidth) {
+    $('.landscape').css('display', 'initial');
+  }
+  $('.color').css('background-color', lineColor);
+  $('.modal-wrapper').css('display','initial');
+
   var complement = '#' + ('000000' + (('0xffffff' ^ ('0x' + lineColor.split('#')[1])).toString(16))).slice(-6);
   var lineCenter = null;
   var lastTouch = null;
@@ -79,7 +88,7 @@ $(document).ready(function() {
   var finalTouches = [];
   var crosses = [];
 
-  function drawDot(x) {
+  function drawDot(x, primary) {
     var el = document.getElementsByTagName("canvas")[0];
     var ctx = el.getContext("2d");
     ctx.beginPath();
@@ -88,7 +97,7 @@ $(document).ready(function() {
     ctx.fill();
     ctx.beginPath();
     ctx.rect(x - 5, ctx.canvas.height / 2 - 5, 10, 10);
-    ctx.fillStyle = complement;
+    ctx.fillStyle = (primary ? lineColor : complement);
     ctx.fill();
   }
 
@@ -97,7 +106,7 @@ $(document).ready(function() {
     var ctx = el.getContext("2d");
     var midi = Math.floor((x / ctx.canvas.width) * 16);
     crosses.push({ x: x, direction: direction, midi: midi });
-    drawDot(x);
+    drawDot(x, false);
   }
 
   function checkLine(touch) {
@@ -131,7 +140,7 @@ $(document).ready(function() {
     for (var i = 0; i < finalTouches.length-1; i++) {
     // redraw lines in ~~~color~~~
       ctx.beginPath();
-      ctx.strokeStyle = lineColor;
+      ctx.strokeStyle = "#FFFFFF";
       ctx.globalAlpha = 1;
       ctx.moveTo(finalTouches[i].x, finalTouches[i].y);
       ctx.lineTo(finalTouches[i+1].x, finalTouches[i+1].y);
@@ -148,18 +157,12 @@ $(document).ready(function() {
       ctx.moveTo(finalTouches[i].x + 4, finalTouches[i].y + 4);
       ctx.lineTo(finalTouches[i+1].x + 4, finalTouches[i+1].y + 4);
       ctx.stroke();
-
-      // ctx.beginPath();
-      // ctx.lineWidth = 8;
-      // ctx.moveTo(finalTouches[i].x, finalTouches[i].y);
-      // ctx.lineTo(finalTouches[i+1].x, finalTouches[i+1].y);
-      // ctx.stroke();
     }
 
     var toSend = [];
     crosses.forEach(function(cross, iter) {
       // redraw dots
-      drawDot(cross.x);
+      drawDot(cross.x, true);
       toSend.push({ midi: cross.midi, dir: cross.direction });
     });
     socket.send(JSON.stringify({ type: 'notes', tempo: tempo, data: toSend, color: { hex: lineColor, rgb: lineColorRGB } }));
@@ -170,6 +173,11 @@ $(document).ready(function() {
       RESIZE LOGIC
    */
   window.onresize = function(event) {
+    if (window.innerHeight > window.innerWidth) {
+      $('.landscape').css('display', 'initial');
+    } else {
+      $('.landscape').css('display', 'none');
+    }
     console.log('resized');
     drawLine();
   };
@@ -218,7 +226,6 @@ $(document).ready(function() {
     var touches = evt.changedTouches;
     var offset = findPos(el);
 
-
     for (var i = 0; i < touches.length; i++) {
       if (touches[i].clientX - offset.x > 0 && touches[i].clientX - offset.x < parseFloat(el.width) && touches[i].clientY - offset.y > 0 && touches[i].clientY - offset.y < parseFloat(el.height)) {
         evt.preventDefault();
@@ -233,9 +240,9 @@ $(document).ready(function() {
           // ctx.moveTo(ongoingTouches[idx].clientX - offset.x, ongoingTouches[idx].clientY - offset.y);
           // ctx.lineTo(touches[i].clientX - offset.x, touches[i].clientY - offset.y);
           // ctx.lineWidth = 4;
-          // ctx.strokeStyle = "#ffffff";
           // ctx.stroke();
           //
+          ctx.strokeStyle = lineColor;
           ctx.beginPath();
 
           ctx.globalAlpha = 1;
@@ -279,7 +286,7 @@ $(document).ready(function() {
       if (idx >= 0) {
         finishTouch();
         ctx.lineWidth = 4;
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle = lineColor;
         ctx.beginPath();
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';

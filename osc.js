@@ -28,16 +28,33 @@ var wss_view = new(ws.Server)({
 wss_view.on('connection', function(ws) {
   console.log('A Web Socket connection has been established!')
   ws.on('message', function(event) {
-    udpPort.send({
-      address: '/test',
-      args: event
-    })
+    console.log('event',event);
+    var data = JSON.parse(event);
+    switch(data.tempo) {
+      case '0':
+        udpPort.send({
+          address: '/eighth',
+          args: data.note
+        })
+        break;
+      case '1':
+        udpPort.send({
+          address: '/quarter',
+          args: data.note
+        })
+        break;
+      case '2':
+        udpPort.send({
+          address: '/half',
+          args: data.note
+        })
+        break;
+    }
   })
 })
 
 wss_view.broadcast = (data) => {
   wss_view.clients.forEach(function each(client) {
-    console.log('data',data);
     client.send(data)
   })
 }

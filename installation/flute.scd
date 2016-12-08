@@ -5,12 +5,25 @@ s.quit;
 
 s.plotTree;
 
-~x = Synth.new(\waveguideFlute, [\freq, 220, \dur, 0.2,\amp, 0.2]);
-~x = Synth.new(\waveguideFlute, [\freq, 440, \dur, 0.2,\amp, 0.2]);
-x.set(\freq, 220);
+// different notes
 (
 OSCdef.new(
-	\test,
+	\eighth,
+	{
+		arg msg, time, addr, port;
+		(msg[1].asInteger).postln;
+		n = msg[1];
+		n.postln;
+		Synth.new(\waveguideFlute, [\freq, msg[1].asInteger.midicps, \dur, 0.1, \amp, 0.1]);
+	},
+	'/eighth'
+);
+)
+
+
+(
+OSCdef.new(
+	\quarter,
 	{
 		arg msg, time, addr, port;
 		(msg[1].asInteger).postln;
@@ -18,32 +31,27 @@ OSCdef.new(
 		n.postln;
 		Synth.new(\waveguideFlute, [\freq, msg[1].asInteger.midicps, \dur, 0.2, \amp, 0.1]);
 	},
-	'/test'
+	'/quarter'
 );
 )
-		Synth.new(\waveguideFlute, [\freq, 700, \dur, 0.2, \amp, 0.5]);
-
-OSCdef.new(
-	\note,
-	{
-		arg msg, time, addr, port;
-		x.set(\freq, msg[1]*20+20);
-		(msg[1] + 2).postln;
-		x.set(\amp, msg[2]);
-		msg[2].postln;
-	},
-	'/note'
-);
 
 (
-Pbind(
-	\instrument, "waveguideFlute",
-	\degree, Pseq([0, 1, 2, 3, 4], 2),
-	\dur, Pwhite(0.2, 0.5),
-	\amp, Pwhite(0.1, 0.4)
-).play
+OSCdef.new(
+	\half,
+	{
+		arg msg, time, addr, port;
+		(msg[1].asInteger).postln;
+		n = msg[1];
+		n.postln;
+		Synth.new(\waveguideFlute, [\freq, msg[1].asInteger.midicps, \dur, 0.6, \amp, 0.13]);
+	},
+	'/half'
+);
 )
 
+
+
+// instrument
 (
 SynthDef("waveguideFlute", { arg scl = 0.2, freq = 440, ipress = 0.9, ibreath = 0.09, ifeedbk1 = 0.4, ifeedbk2 = 0.4, dur = 1, gate = 1, amp = 2;
 

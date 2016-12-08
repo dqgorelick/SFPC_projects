@@ -39,13 +39,14 @@ var Player = function(id, options, sendNote) {
   this.id = id;
   this.baseNote = options.baseNote || DEFAULT_BASE_NOTE;
   this.songRate = options.songRate || DEFAULT_SONG_RATE;
+  this.songTempo = options.songTempo || 1;
   this.mode = options.mode || MODES.song;
   // socket callback
   this.sendNote = sendNote;
   // song mode
   this.song = options.song || TEST_SONG;
   this.songIndex = 0;
-
+  this.dir = options.dir || CW;
   // movement logic
   this.playing = false;
   this.meter = null;
@@ -60,6 +61,14 @@ var Player = function(id, options, sendNote) {
       orientation: CURSOR_RIGHT
     },
     2: {
+      rotation: CCW,
+      orientation: CURSOR_LEFT
+    },
+    3: {
+      rotation: CW,
+      orientation: CURSOR_RIGHT
+    },
+    4: {
       rotation: CCW,
       orientation: CURSOR_LEFT
     }
@@ -82,6 +91,7 @@ var Player = function(id, options, sendNote) {
   this.cursorLeft.css('background-color', options.color.hex);
 }
 Player.prototype.tempo = function(tempo) {
+  this.songTempo = tempo;
   this.songRate = TEMPOS[tempo];
   this.jQuery.css('-webkit-transition', '-webkit-transform ' + this.songRate + 'ms linear');
   this.jQuery.css('transition', 'transform ' + this.songRate + 'ms linear');
@@ -115,6 +125,12 @@ Player.prototype.start = function() {
         case 2:
           self.state = (self.toFlip ? 1 : 2);
           break;
+        case 3:
+          self.state = (self.toFlip ? 4 : 3);
+          break;
+        case 4:
+          self.state = (self.toFlip ? 3 : 4);
+          break;
         default:
           console.error('invalid state reached');
           break;
@@ -122,10 +138,12 @@ Player.prototype.start = function() {
       self.toFlip = false;
     }
 
-    if (self.mode === MODES.song) {
-      if (current < next && next <= next_2) {
+    if (current !== next) {
+      if (current < next && next < next_2) {
         self.toFlip = true;
-      } else if (current > next && next >= next_2) {
+        console.log('flipping!');
+      } else if (current > next && next > next_2) {
+        console.log('flipping!');
         self.toFlip = true;
       }
     }
@@ -138,12 +156,12 @@ Player.prototype.start = function() {
       self.rightHand = notes[current];
     } else if (current === next) {
       self.rightHand = notes[current];
-      self.leftHand = notes[next];
+      self.leftHand = notes[current];
     }
 
     if (self.song.length > 0) {
       // play and animate note
-      self.sendNote(midiNote);
+      self.sendNote(midiNote, self.songTempo);
       animateNote(current, 150);
     }
 
@@ -163,17 +181,21 @@ Player.prototype.start = function() {
 }
 Player.prototype.render = function() {
   if (this.song.length === 0) {
+    // no notes played
     this.cursorRight.css('display', 'none');
     this.cursorLeft.css('display', 'none');
     return;
   }
   if (!this.rightHand && !this.leftHand) {
+    // first pass through
     return;
   }
   var params = this.states[this.state];
-  this.rotationCount += params.rotation;
-  this.jQuery.css('-webkit-transform', 'rotate(' + (this.rotationCount) * 180 + 'deg)');
-  this.jQuery.css('transform:', 'rotate(' + (this.rotationCount) * 180 + 'deg)');
+  if (this.rightHand !== this.leftHand) {
+    this.rotationCount += params.rotation;
+    this.jQuery.css('-webkit-transform', 'rotate(' + (this.rotationCount) * 180 + 'deg)');
+    this.jQuery.css('transform:', 'rotate(' + (this.rotationCount) * 180 + 'deg)');
+  }
 
   if (params.orientation === CURSOR_LEFT) {
     this.cursorRight.css('display', 'initial')
@@ -290,14 +312,22 @@ $(document).ready(function() {
         players[message.id] = message
         players[message.id].id = message.id
         var notes = [];
+        var dir;
         message.notes.forEach(function(note, iter) {
           if (iter === 0) {
-            players[message.id].dir = note.dir
+            dir = note.dir;
           }
           notes.push(note.midi)
         })
-        players[message.id].notes = notes
-        players[message.id].player = new Player(players[message.id].id, { songRate: TEMPOS[message.tempo], song: players[message.id].notes, color: message.color }, sendNote);
+        players[message.id].notes = notes;
+        players[message.id].player = new Player(players[message.id].id,
+        {
+          songTempo: message.tempo,
+          songRate: TEMPOS[message.tempo],
+          song: players[message.id].notes,
+          color: message.color,
+          dir: dir
+        }, sendNote);
         players[message.id].player.stop();
         players[message.id].player.reset();
         players[message.id].player.start();
@@ -331,8 +361,10 @@ $(document).ready(function() {
     }
   };
 
-  function sendNote(note) {
-    socket.send(note);
+  function sendNote(note, tempo) {
+    // quarternote by default
+    tempo = tempo || 1;
+    socket.send(JSON.stringify({note: note, tempo: tempo}));
   }
 
 
