@@ -26,7 +26,6 @@ SynthDef(\bpfsaw2, {
 
 a = Scale.major;
 
-a = Scale.minor;
 ~b = NetAddr.new("127.0.0.1", 57121);
 n = 48;
 
@@ -85,6 +84,6 @@ n = 50;
 	})
 
 ).play;
-)
+// )
 
 ~chords.stop;

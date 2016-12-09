@@ -5,9 +5,9 @@ $(document).ready(function() {
   // home
   // var socket = new WebSocket("ws://192.168.0.4:8088/");
   // sfpc
-  // var socket = new WebSocket("ws://192.168.1.237:8088/");
+  var socket = new WebSocket("ws://192.168.1.237:8088/");
   // localhost
-  var socket = new WebSocket("ws://127.0.0.1:8088/");
+  // var socket = new WebSocket("ws://127.0.0.1:8088/");
   // var socket = new WebSocket("ws://192.168.1.237:8088/");
   // catberry
   // var socket = new WebSocket("ws://10.0.1.31:8088/");
@@ -86,7 +86,9 @@ $(document).ready(function() {
   var complement = '#' + ('000000' + (('0xffffff' ^ ('0x' + lineColor.split('#')[1])).toString(16))).slice(-6);
   var lineCenter = null;
   var lastTouch = null;
-  var lastPoint = null
+  var lastPoint = null;
+  var playing = false;
+  var timeout = 0;
   var finalTouches = [];
   var crosses = [];
 
@@ -116,10 +118,8 @@ $(document).ready(function() {
       lastTouch = touch;
     } else {
       if (touch.clientY >= lineCenter && lastTouch.clientY < lineCenter) {
-        console.log('DOWN');
         addNode((touch.clientX + lastTouch.clientX) / 2, 'down');
       } else if (touch.clientY <= lineCenter && lastTouch.clientY > lineCenter) {
-        console.log('UP');
         addNode((touch.clientX + lastTouch.clientX) / 2, 'up');
       }
       lastTouch = touch;
@@ -169,8 +169,26 @@ $(document).ready(function() {
     });
     socket.send(JSON.stringify({ type: 'notes', tempo: tempo, data: toSend, color: { hex: lineColor, rgb: lineColorRGB } }));
     lastNote = null;
+    timeout = 0;
+    playing = true;
     crosses = [];
   }
+
+  var timeout = function() {
+    if (playing) {
+      timeout += 1;
+      // 30 seconds before being removed from the screen
+      if (timeout >= 30) {
+        playing = false;
+        timeout = 0;
+        drawLine();
+      }
+    }
+  }
+
+  // watch for timeout every second
+  setInterval(timeout, 1000);
+
   /*
       RESIZE LOGIC
    */
@@ -180,7 +198,6 @@ $(document).ready(function() {
     } else {
       $('.landscape').css('display', 'none');
     }
-    console.log('resized');
     drawLine();
   };
 

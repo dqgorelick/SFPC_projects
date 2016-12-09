@@ -1,5 +1,10 @@
 'use strict';
 
+/*
+  feature flags
+ */
+
+var QUANTIZE = true;
 var PORT_PLAYER = 8888;
 
 var DEFAULT_BASE_NOTE = 48;
@@ -41,6 +46,7 @@ var Player = function(id, options, sendNote) {
   this.songRate = options.songRate || DEFAULT_SONG_RATE;
   this.songTempo = options.songTempo || 1;
   this.mode = options.mode || MODES.song;
+  this.timeout = 0;
   // socket callback
   this.sendNote = sendNote;
   // song mode
@@ -105,8 +111,8 @@ Player.prototype.start = function() {
     next = self.song[(self.songIndex + 1) % self.song.length];
     next_2 = self.song[(self.songIndex + 2) % self.song.length];
 
+    // sets last note for reference if there is a string of the same notes
     if (current !== next && next === next_2) {
-      console.log('hello');
       self.lastNote = current;
     }
     // get actual note mappings
@@ -145,9 +151,7 @@ Player.prototype.start = function() {
 
     if (current < next && next < next_2) {
       self.toFlip = true;
-      console.log('flipping!');
     } else if (current > next && next > next_2) {
-      console.log('flipping!');
       self.toFlip = true;
     } else if (current === next && next !== next_2) {
       if (self.lastNote) {
@@ -157,7 +161,6 @@ Player.prototype.start = function() {
           self.toFlip = true;
         }
       } else {
-        console.log('self.lastNote',self.lastNote);
         // by default we only start CW
         // TODO: fix this shit
         if (next > next_2) {
@@ -238,6 +241,7 @@ Player.prototype.remove = function() {
   $('#' + this.id).remove();
 }
 Player.prototype.reset = function() {
+  this.lastNote = null;
   this.leftHand = null;
   this.rightHand = null;
   this.songIndex = 0;
@@ -348,7 +352,12 @@ $(document).ready(function() {
         }, sendNote);
         players[message.id].player.stop();
         players[message.id].player.reset();
-        players[message.id].player.start();
+        if(QUANTIZE) {
+          players[message.id].toStart = true;
+        } else {
+          players[message.id].player.start();
+        }
+
       } else {
         // player exists already
         var notes = [];
@@ -360,8 +369,12 @@ $(document).ready(function() {
         })
         players[message.id].player.stop();
         players[message.id].player.reset();
+        if(QUANTIZE) {
+          players[message.id].toStart = true;
+        } else {
+          players[message.id].player.start();
+        }
         players[message.id].player.song = notes;
-        players[message.id].player.start();
       }
     } else if (message.type === 'tempo') {
       players[message.id].player.tempo(message.tempo);
@@ -393,6 +406,42 @@ $(document).ready(function() {
   initializeSettings();
 
   /*
+    Loop over players
+   */
+  var loopCount = 0;
+  function loopPlayers() {
+    for (var id in players) {
+      if (!!players[id]) {
+        // look for players to start
+        if (players[id].toStart) {
+          // reset timeout upon new input
+          players[id].player.timeout = 0;
+          players[id].toStart = false;
+          players[id].player.start();
+        }
+        // look for inactive players every second
+        if (loopCount >= 5) {
+          loopCount = 0;
+          // increase timeout every second
+          players[id].player.timeout += 1;
+          // remove player if no actions for more than 30 seconds
+          if (players[id].player.timeout >= 30) {
+            players[id].player.stop();
+            players[id].player.remove();
+            players[id] = null;
+          }
+        }
+      }
+    }
+    loopCount++;
+  }
+
+  // set interval at the shortest delimination of notes
+  if (QUANTIZE) {
+    setInterval(loopPlayers, TEMPOS[0]);
+  }
+
+  /*
     USER INPUT
    */
 
@@ -405,5 +454,4 @@ $(document).ready(function() {
     var note = $(this).attr("id");
     sendNote(notes[note].midi);
   });
-
 });
