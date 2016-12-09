@@ -304,16 +304,6 @@ function renderNotes() {
       )
     })()
   )
-
-  $('.cursor-right').css('height', noteHeight);
-  $('.cursor-right').css('width', noteHeight);
-  $('.cursor-right').css('right', -noteHeight/2);
-  $('.cursor-right').css('top', 'calc(50% -' + noteHeight/2 + 'px)');
-
-  $('.cursor').css('height', noteHeight);
-  $('.cursor').css('width', noteHeight);
-  $('.cursor').css('left', -noteHeight/2);
-  $('.cursor').css('top', 'calc(50% -' + noteHeight/2 + 'px)');
 }
 
 function initializeSettings() {
