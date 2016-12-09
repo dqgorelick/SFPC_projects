@@ -105,6 +105,10 @@ Player.prototype.start = function() {
     next = self.song[(self.songIndex + 1) % self.song.length];
     next_2 = self.song[(self.songIndex + 2) % self.song.length];
 
+    if (current !== next && next === next_2) {
+      console.log('hello');
+      self.lastNote = current;
+    }
     // get actual note mappings
     var midiNote = (current < 7 ? 0 : (current > 13 ? 24 : 12)) + self.baseNote + MINOR_SCALE[(current) % 7];
 
@@ -138,13 +142,27 @@ Player.prototype.start = function() {
       self.toFlip = false;
     }
 
-    if (current !== next) {
-      if (current < next && next < next_2) {
-        self.toFlip = true;
-        console.log('flipping!');
-      } else if (current > next && next > next_2) {
-        console.log('flipping!');
-        self.toFlip = true;
+
+    if (current < next && next < next_2) {
+      self.toFlip = true;
+      console.log('flipping!');
+    } else if (current > next && next > next_2) {
+      console.log('flipping!');
+      self.toFlip = true;
+    } else if (current === next && next !== next_2) {
+      if (self.lastNote) {
+        if (self.lastNote < next && next < next_2) {
+          self.toFlip = true;
+        } else if (self.lastNote > next && next > next_2) {
+          self.toFlip = true;
+        }
+      } else {
+        console.log('self.lastNote',self.lastNote);
+        // by default we only start CW
+        // TODO: fix this shit
+        if (next > next_2) {
+          self.toFlip = true;
+        }
       }
     }
 

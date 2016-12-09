@@ -30,24 +30,31 @@ wss_view.on('connection', function(ws) {
   ws.on('message', function(event) {
     console.log('event',event);
     var data = JSON.parse(event);
-    switch(data.tempo) {
-      case '0':
+    console.log('data.tempo',data.tempo);
+    switch(parseInt(data.tempo)) {
+      case 0:
+        console.log('/eighth');
         udpPort.send({
           address: '/eighth',
           args: data.note
         })
         break;
-      case '1':
+      case 1:
+        console.log('/quarter');
         udpPort.send({
           address: '/quarter',
           args: data.note
         })
         break;
-      case '2':
+      case 2:
+        console.log('/half');
         udpPort.send({
           address: '/half',
           args: data.note
         })
+        break;
+      default:
+        console.log('data.tempo',data.tempo);
         break;
     }
   })

@@ -5,7 +5,9 @@ $(document).ready(function() {
   // home
   // var socket = new WebSocket("ws://192.168.0.4:8088/");
   // sfpc
-  var socket = new WebSocket("ws://192.168.1.237:8088/");
+  // var socket = new WebSocket("ws://192.168.1.237:8088/");
+  // localhost
+  var socket = new WebSocket("ws://127.0.0.1:8088/");
   // var socket = new WebSocket("ws://192.168.1.237:8088/");
   // catberry
   // var socket = new WebSocket("ws://10.0.1.31:8088/");
