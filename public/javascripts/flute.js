@@ -425,7 +425,7 @@ $(document).ready(function() {
           // increase timeout every second
           players[id].player.timeout += 1;
           // remove player if no actions for more than 30 seconds
-          if (players[id].player.timeout >= 30) {
+          if (players[id].player.timeout >= 45) {
             players[id].player.stop();
             players[id].player.remove();
             players[id] = null;

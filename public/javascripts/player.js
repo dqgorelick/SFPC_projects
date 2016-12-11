@@ -82,6 +82,7 @@ $(document).ready(function() {
   if (window.innerHeight > window.innerWidth) {
     $('.landscape').css('display', 'initial');
   }
+  $('.url').css('display', (window.innerWidth > 800 ? 'initial':'none'));
   $('.color').css('background-color', lineColor);
   $('.modal-wrapper').css('display','initial');
 
@@ -97,14 +98,22 @@ $(document).ready(function() {
   function drawDot(x, primary) {
     var el = document.getElementsByTagName("canvas")[0];
     var ctx = el.getContext("2d");
+
     ctx.beginPath();
-    ctx.rect(x - 9, ctx.canvas.height / 2 - 9, 18, 18);
-    ctx.fillStyle = 'white';
+    ctx.arc(x, ctx.canvas.height / 2, 12, 0, 2 * Math.PI, false);
+    ctx.fillStyle = lineColor;
     ctx.fill();
-    ctx.beginPath();
-    ctx.rect(x - 5, ctx.canvas.height / 2 - 5, 10, 10);
-    ctx.fillStyle = (primary ? lineColor : complement);
-    ctx.fill();
+    ctx.strokeStyle = lineColor;
+    ctx.stroke();
+
+    // ctx.beginPath();
+    // ctx.rect(x - 9, ctx.canvas.height / 2 - 9, 18, 18);
+    // ctx.fillStyle = 'white';
+    // ctx.fill();
+    // ctx.beginPath();
+    // ctx.rect(x - 5, ctx.canvas.height / 2 - 5, 10, 10);
+    // ctx.fillStyle = (primary ? lineColor : complement);
+    // ctx.fill();
   }
 
   function addNode(x, direction) {
@@ -120,9 +129,27 @@ $(document).ready(function() {
       lastTouch = touch;
     } else {
       if (touch.clientY >= lineCenter && lastTouch.clientY < lineCenter) {
-        addNode((touch.clientX + lastTouch.clientX) / 2, 'down');
+        var m = (lastTouch.clientY - touch.clientY) / (lastTouch.clientX - touch.clientX);
+        if (m !== -Infinity || m!== Infinity) {
+          var el = document.getElementsByTagName("canvas")[0];
+          var ctx = el.getContext("2d");
+          var dy =  lastTouch.clientY - ctx.canvas.height/2;
+          var x_tar = (m*lastTouch.clientX - dy) / m;
+          addNode(x_tar, 'down');
+        } else {
+          addNode((touch.clientX + lastTouch.clientX) / 2, 'down');
+        }
       } else if (touch.clientY <= lineCenter && lastTouch.clientY > lineCenter) {
-        addNode((touch.clientX + lastTouch.clientX) / 2, 'up');
+        var m = (lastTouch.clientY - touch.clientY) / (lastTouch.clientX - touch.clientX);
+        if (m !== -Infinity || m!== Infinity) {
+          var el = document.getElementsByTagName("canvas")[0];
+          var ctx = el.getContext("2d");
+          var dy =  lastTouch.clientY - ctx.canvas.height/2;
+          var x_tar = (m*lastTouch.clientX - dy) / m;
+          addNode(x_tar, 'up');
+        } else {
+          addNode((touch.clientX + lastTouch.clientX) / 2, 'up');
+        }
       }
       lastTouch = touch;
     }
@@ -211,7 +238,7 @@ $(document).ready(function() {
     $('.modal-wrapper').css('opacity', '0');
     setTimeout(function() { $('.modal-wrapper').css('display', 'none') }, 250);
 
-    var el = document.body;
+    var el = document.getElementsByTagName("canvas")[0];
     el.addEventListener("touchstart", handleStart, false);
     el.addEventListener("touchend", handleEnd, false);
     el.addEventListener("touchcancel", handleCancel, false);
