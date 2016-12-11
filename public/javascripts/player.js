@@ -217,7 +217,7 @@ $(document).ready(function() {
     if (playing) {
       timeout += 1;
       // 30 seconds before being removed from the screen
-      if (timeout >= 30) {
+      if (timeout >= 45) {
         playing = false;
         timeout = 0;
         drawLine();
