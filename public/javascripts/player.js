@@ -135,7 +135,12 @@ $(document).ready(function() {
           var ctx = el.getContext("2d");
           var dy =  lastTouch.clientY - ctx.canvas.height/2;
           var x_tar = (m*lastTouch.clientX - dy) / m;
-          addNode(x_tar, 'down');
+          console.log('x_tar',x_tar);
+          if (!!x_tar) {
+            addNode(x_tar, 'down');
+          } else {
+            addNode((touch.clientX + lastTouch.clientX) / 2, 'down');
+          }
         } else {
           addNode((touch.clientX + lastTouch.clientX) / 2, 'down');
         }
@@ -146,7 +151,12 @@ $(document).ready(function() {
           var ctx = el.getContext("2d");
           var dy =  lastTouch.clientY - ctx.canvas.height/2;
           var x_tar = (m*lastTouch.clientX - dy) / m;
-          addNode(x_tar, 'up');
+          console.log('x_tar',x_tar);
+          if (!!x_tar) {
+            addNode(x_tar, 'up');
+          } else {
+            addNode((touch.clientX + lastTouch.clientX) / 2, 'up');
+          }
         } else {
           addNode((touch.clientX + lastTouch.clientX) / 2, 'up');
         }
