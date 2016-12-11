@@ -68,12 +68,12 @@
                 <div class="feed" id="tokyo">
                     <h1>TOKYO</h1>
                     <!-- <div class="details"> -->
-                        <p>Tokyo ground</p>
-                        <audio id="tokyo1" src="http://d.liveatc.net/rjtt_control" autoplay="" controls="" volume="0.2">
+                        <p>LAX 1</p>
+                        <audio id="jfk1" src="http://d.liveatc.net/redir.php/klax5" autoplay="" controls="" volume="0.2">
                             <p>Your browser does not support the <code>audio</code> element.</p>
                         </audio>
-                        <p>Tokyo Arrivals</p>
-                        <audio id="tokyo2" src="http://d.liveatc.net/redir.php/rjtt_app_dep" autoplay="" controls="" volume="0.2">
+                        <p>LAX 2</p>
+                        <audio id="jfk2" src="http://d.liveatc.net/klax_atis_arr" autoplay="" controls="" volume="0.2">
                             <p>Your browser does not support the <code>audio</code> element.</p>
                         </audio>
                     <!-- </div> -->
@@ -82,11 +82,11 @@
                     <h1>NYC</h1>
                     <!-- <div class="details"> -->
                         <p>JFK commercial</p>
-                        <audio id="jfk1" src="http://mtl2.liveatc.net/kjfk_co" autoplay="" controls="" volume="0.2">
+                        <audio id="tokyo1" src="http://mtl2.liveatc.net/kjfk_co" autoplay="" controls="" volume="0.2">
                             <p>Your browser does not support the <code>audio</code> element.</p>
                         </audio>
                         <p>JFK ground</p>
-                        <audio id="jfk2" src="http://bos.liveatc.net/kjfk_gnd" autoplay="" controls="" volume="0.2">
+                        <audio id="tokyo2" src="http://bos.liveatc.net/kjfk_gnd" autoplay="" controls="" volume="0.2">
                             <p>Your browser does not support the <code>audio</code> element.</p>
                         </audio>
                     <!-- </div> -->
@@ -96,37 +96,37 @@
         <!-- <script src="./javascripts/flight.js"></script> -->
         <script async src="https://www.youtube.com/iframe_api"></script>
         <script>
-         function onYouTubeIframeAPIReady() {
-          var player;
-          player = new YT.Player('muteYouTubeVideoPlayer', {
-            videoId: 'i7mlhv80A_k',
-            width: 560,
-            height: 316,
-            playerVars: {
-              autoplay: 1,
-              controls: 0,
-              showinfo: 0,
-              modestbranding: 1,
-              loop: 0,
-              fs: 0,
-              cc_load_policy: 0,
-              iv_load_policy: 3,
-              autohide: 0 ,
-              start:180
-            },
-            events: {
-              onReady: function(e) {
-                e.target.mute();
-              },
-              onStateChange: function(e){
-                  var id = 'i7mlhv80A_k';
-                  if(e.data === YT.PlayerState.ENDED){
-                      player.loadVideoById(id);
-                  }
-              }
-            }
-          });
-         }
+         // function onYouTubeIframeAPIReady() {
+         //  var player;
+         //  player = new YT.Player('muteYouTubeVideoPlayer', {
+         //    videoId: 'i7mlhv80A_k',
+         //    width: 560,
+         //    height: 316,
+         //    playerVars: {
+         //      autoplay: 1,
+         //      controls: 0,
+         //      showinfo: 0,
+         //      modestbranding: 1,
+         //      loop: 0,
+         //      fs: 0,
+         //      cc_load_policy: 0,
+         //      iv_load_policy: 3,
+         //      autohide: 0 ,
+         //      start:180
+         //    },
+         //    events: {
+         //      onReady: function(e) {
+         //        e.target.mute();
+         //      },
+         //      onStateChange: function(e){
+         //          var id = 'i7mlhv80A_k';
+         //          if(e.data === YT.PlayerState.ENDED){
+         //              player.loadVideoById(id);
+         //          }
+         //      }
+         //    }
+         //  });
+         // }
         </script>
         <script>
             /*
