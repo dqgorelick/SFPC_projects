@@ -1,5 +1,9 @@
 Server.local.boot;
 s.quit;
+ServerOptions.outDevices
+Server.default.options.inDevice_("Soundflower (2ch)")
+Server.default.options.outDevice_("Soundflower (2ch)")
+
 // start server for OSC
 ~b = NetAddr.new("127.0.0.1", 57121);
 

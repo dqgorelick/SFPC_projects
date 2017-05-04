@@ -19,7 +19,7 @@ function findPolarCoordinates(note, steps) {
 /*
     Incoming data on socket
  */
-var socket = new WebSocket('ws://0.0.0.0:8081/');
+var socket = new WebSocket('ws://localhost:8081/');
 
 socket.onmessage = function(evt) {
     var result = JSON.parse(evt.data);

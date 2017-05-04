@@ -96,37 +96,37 @@
         <!-- <script src="./javascripts/flight.js"></script> -->
         <script async src="https://www.youtube.com/iframe_api"></script>
         <script>
-         // function onYouTubeIframeAPIReady() {
-         //  var player;
-         //  player = new YT.Player('muteYouTubeVideoPlayer', {
-         //    videoId: 'i7mlhv80A_k',
-         //    width: 560,
-         //    height: 316,
-         //    playerVars: {
-         //      autoplay: 1,
-         //      controls: 0,
-         //      showinfo: 0,
-         //      modestbranding: 1,
-         //      loop: 0,
-         //      fs: 0,
-         //      cc_load_policy: 0,
-         //      iv_load_policy: 3,
-         //      autohide: 0 ,
-         //      start:180
-         //    },
-         //    events: {
-         //      onReady: function(e) {
-         //        e.target.mute();
-         //      },
-         //      onStateChange: function(e){
-         //          var id = 'i7mlhv80A_k';
-         //          if(e.data === YT.PlayerState.ENDED){
-         //              player.loadVideoById(id);
-         //          }
-         //      }
-         //    }
-         //  });
-         // }
+         function onYouTubeIframeAPIReady() {
+          var player;
+          player = new YT.Player('muteYouTubeVideoPlayer', {
+            videoId: 'i7mlhv80A_k',
+            width: 560,
+            height: 316,
+            playerVars: {
+              autoplay: 1,
+              controls: 0,
+              showinfo: 0,
+              modestbranding: 1,
+              loop: 0,
+              fs: 0,
+              cc_load_policy: 0,
+              iv_load_policy: 3,
+              autohide: 0 ,
+              start:180
+            },
+            events: {
+              onReady: function(e) {
+                e.target.mute();
+              },
+              onStateChange: function(e){
+                  var id = 'i7mlhv80A_k';
+                  if(e.data === YT.PlayerState.ENDED){
+                      player.loadVideoById(id);
+                  }
+              }
+            }
+          });
+         }
         </script>
         <script>
             /*

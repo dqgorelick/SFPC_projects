@@ -7,12 +7,17 @@ $(document).ready(function() {
   // sfpc
   // var socket = new WebSocket("ws://192.168.1.237:8088/");
   // sfpc ngrok
-  var socket = new WebSocket("ws://sfpc_view.ngrok.io/");
+  // var socket = new WebSocket("ws://sfpc_view.ngrok.io/");
   // localhost
   // var socket = new WebSocket("ws://127.0.0.1:8088/");
   // var socket = new WebSocket("ws://192.168.1.237:8088/");
   // catberry
   // var socket = new WebSocket("ws://10.0.1.31:8088/");
+  // lior
+  // var socket = new WebSocket("ws://192.168.0.6:8088/");
+  // vince
+  var socket = new WebSocket("ws://192.168.1.207:8088/");
+
   socket.onmessage = function(evt) {};
 
   socket.onclose = function(evt) {

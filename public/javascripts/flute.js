@@ -325,7 +325,7 @@ $(document).ready(function() {
   var players = {};
 
   // view web socket
-  var socket = new WebSocket('ws://0.0.0.0:8082/');
+  var socket = new WebSocket('ws://localhost:8082/');
   socket.onmessage = function(evt) {
     var message = JSON.parse(evt.data);
     if (message.type === 'notes') {
@@ -445,13 +445,13 @@ $(document).ready(function() {
     USER INPUT
    */
 
-  $('.note').on('click', function(evt) {
+  $('.note').on('mouseenter', function(evt) {
     var note = $(this).attr("id");
     sendNote(notes[note].midi);
   });
 
-  $('.note').hover(function(evt) {
-    var note = $(this).attr("id");
-    sendNote(notes[note].midi);
-  });
+  // $('.note').hover(function(evt) {
+  //   var note = $(this).attr("id");
+  //   sendNote(notes[note].midi);
+  // });
 });
