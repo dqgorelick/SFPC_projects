@@ -28,6 +28,7 @@
                 display: inline-block;
                 width: 45%;
                 opacity: 0.5;
+                cursor: pointer;
             }
 
             .feed.active{
@@ -37,6 +38,7 @@
                 top: -50px;
                 width: 100%;
                 position: absolute;
+                pointer-events: none;
 
             }
             .videoWrapper {
@@ -68,12 +70,12 @@
                 <div class="feed" id="tokyo">
                     <h1>TOKYO</h1>
                     <!-- <div class="details"> -->
-                        <p>LAX 1</p>
-                        <audio id="jfk1" src="http://d.liveatc.net/redir.php/klax5" autoplay="" controls="" volume="0.2">
+                        <p>Haneda Airport Control</p>
+                        <audio id="left1" src="http://bos.liveatc.net/rjtt_app_dep" autoplay="" controls="" volume="0.2">
                             <p>Your browser does not support the <code>audio</code> element.</p>
                         </audio>
-                        <p>LAX 2</p>
-                        <audio id="jfk2" src="http://d.liveatc.net/klax_atis_arr" autoplay="" controls="" volume="0.2">
+                        <p>Haneda Airport App/Dep</p>
+                        <audio id="left2" src="http://d.liveatc.net/redir.php/rjtt_control" autoplay="" controls="" volume="0.2">
                             <p>Your browser does not support the <code>audio</code> element.</p>
                         </audio>
                     <!-- </div> -->
@@ -81,12 +83,12 @@
                 <div class="feed" id="nyc">
                     <h1>NYC</h1>
                     <!-- <div class="details"> -->
-                        <p>JFK commercial</p>
-                        <audio id="tokyo1" src="http://mtl2.liveatc.net/kjfk_co" autoplay="" controls="" volume="0.2">
+                        <p>JFK Airport commercial</p>
+                        <audio id="right1" src="http://mtl2.liveatc.net/kjfk_co" autoplay="" controls="" volume="0.2">
                             <p>Your browser does not support the <code>audio</code> element.</p>
                         </audio>
-                        <p>JFK ground</p>
-                        <audio id="tokyo2" src="http://bos.liveatc.net/kjfk_gnd" autoplay="" controls="" volume="0.2">
+                        <p>JFK Airport ground</p>
+                        <audio id="right2" src="http://bos.liveatc.net/kjfk_gnd" autoplay="" controls="" volume="0.2">
                             <p>Your browser does not support the <code>audio</code> element.</p>
                         </audio>
                     <!-- </div> -->
@@ -147,10 +149,10 @@
                 }
                 function playNYC () {
                     console.log('playing NYC');
-                    document.getElementById("jfk1").volume=0.2;
-                    document.getElementById("jfk2").volume=0.2;
-                    document.getElementById("tokyo1").volume=0.0;
-                    document.getElementById("tokyo2").volume=0.0;
+                    document.getElementById("left1").volume=0.0;
+                    document.getElementById("left2").volume=0.0;
+                    document.getElementById("right1").volume=0.2;
+                    document.getElementById("right2").volume=0.2;
                     $("#nyc").addClass('active');
                     $("#tokyo").removeClass('active');
                 }
@@ -158,40 +160,47 @@
                     $("#nyc").removeClass('active');
                     $("#tokyo").addClass('active');
                     console.log('playing Tokyo');
-                    document.getElementById("jfk1").volume=0.0;
-                    document.getElementById("jfk2").volume=0.0;
-                    document.getElementById("tokyo1").volume=0.2;
-                    document.getElementById("tokyo2").volume=0.2;
+                    document.getElementById("left1").volume=0.2;
+                    document.getElementById("left2").volume=0.2;
+                    document.getElementById("right1").volume=0.0;
+                    document.getElementById("right2").volume=0.0;
                 }
-                var nycPlaying = false;
+
+                var nycPlaying = true;
                 var tokyoPlaying = false;
                 var socket = new WebSocket('ws://0.0.0.0:8082/');
 
                 socket.onmessage = function(evt) {
                     var result = JSON.parse(evt.data);
-                    console.log('result',result);
                     if (result.nyc === "true") {
-                        // if(!nycPlaying) {
-                        //     nycPlaying = true;
+                        if(!nycPlaying) {
+                            nycPlaying = true;
                             playNYC();
-                        // }
+                        }
                     }
                     if (result.tokyo === "true") {
-                        // if(!tokyoPlaying) {
-                        //     tokyoPlaying = true;
+                        if(!tokyoPlaying) {
+                            tokyoPlaying = true;
                             playTokyo();
-                        // }
+                        }
                     }
                 };
 
-                document.getElementById("jfk1").volume=0.2;
-                document.getElementById("jfk2").volume=0.2;
-                document.getElementById("tokyo1").volume=0.0;
-                document.getElementById("tokyo2").volume=0.0;
-                document.getElementById("jfk1").play();
-                document.getElementById("jfk2").play();
-                document.getElementById("tokyo1").play();
-                document.getElementById("tokyo2").play();
+                // document.getElementById("left1").volume=0.0;
+                // document.getElementById("left2").volume=0.0;
+                // document.getElementById("right1").volume=0.2;
+                // document.getElementById("right2").volume=0.2;
+                // document.getElementById("left1").play();
+                // document.getElementById("left2").play();
+                // document.getElementById("right1").play();
+                // document.getElementById("right2").play();
+                playNYC();
+                $('#nyc').click(function() {
+                    playNYC();
+                })
+                $('#tokyo').click(function() {
+                    playTokyo();
+                })
 
 
             })
